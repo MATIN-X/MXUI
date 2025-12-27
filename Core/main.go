@@ -559,7 +559,13 @@ func initDatabase() error {
 		encryptionKey = AppConfig.Database.EncryptionKey
 	}
 
-	if err := InitDatabase(encryptionKey); err != nil {
+	// Use database path from config
+	dbPath := AppConfig.Database.Path
+	if dbPath == "" {
+		dbPath = "/opt/mxui/data/mxui.db"
+	}
+
+	if err := InitDatabaseWithPath(dbPath, encryptionKey); err != nil {
 		return err
 	}
 

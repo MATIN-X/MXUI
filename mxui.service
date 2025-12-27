@@ -45,7 +45,7 @@ Group=root
 WorkingDirectory=/opt/mxui
 
 # Main executable
-ExecStart=/opt/mxui/bin/mxui --config /opt/mxui/config.yaml
+ExecStart=/opt/mxui/bin/mxui --config /opt/mxui/config/config.yaml
 
 # Reload configuration
 ExecReload=/bin/kill -HUP $MAINPID
@@ -55,10 +55,10 @@ ExecStop=/bin/kill -TERM $MAINPID
 
 # Pre-start script (check requirements)
 ExecStartPre=/bin/bash -c 'test -f /opt/mxui/bin/mxui || (echo "MXUI binary not found" && exit 1)'
-ExecStartPre=/bin/bash -c 'test -f /opt/mxui/config.yaml || (echo "Config file not found" && exit 1)'
+ExecStartPre=/bin/bash -c 'test -f /opt/mxui/config/config.yaml || (echo "Config file not found" && exit 1)'
 
-# Post-start script
-ExecStartPost=/bin/bash -c 'sleep 2 && curl -sf http://localhost:8443/health > /dev/null && echo "MXUI started successfully" || echo "Warning: Health check failed"'
+# Post-start script (health check is optional - panel may use different port)
+ExecStartPost=/bin/bash -c 'sleep 3 && echo "MXUI service started"'
 
 # Restart policy
 Restart=always
@@ -137,7 +137,7 @@ Nice=0
 EnvironmentFile=-/opt/mxui/.env
 
 # Environment variables
-Environment="MXUI_CONFIG=/opt/mxui/config.yaml"
+Environment="MXUI_CONFIG=/opt/mxui/config/config.yaml"
 Environment="MXUI_DATA_DIR=/opt/mxui/data"
 Environment="MXUI_LOG_DIR=/opt/mxui/logs"
 Environment="GOGC=100"

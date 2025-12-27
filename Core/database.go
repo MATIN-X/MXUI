@@ -123,16 +123,27 @@ var (
 
 // InitDatabase initializes the database connection
 func InitDatabase(encryptionPassword string) error {
+	return InitDatabaseWithPath("", encryptionPassword)
+}
+
+// InitDatabaseWithPath initializes the database connection with a specific path
+func InitDatabaseWithPath(dbPath, encryptionPassword string) error {
 	var initErr error
 
 	once.Do(func() {
+		// Use provided path or fall back to default
+		if dbPath == "" {
+			dbPath = filepath.Join(DBPath, DBFileName)
+		}
+
 		DB = &DatabaseManager{
-			dbPath: filepath.Join(DBPath, DBFileName),
+			dbPath: dbPath,
 		}
 		Database = DB // Set alias
 
 		// Create data directory if not exists
-		if err := os.MkdirAll(DBPath, 0755); err != nil {
+		dbDir := filepath.Dir(dbPath)
+		if err := os.MkdirAll(dbDir, 0755); err != nil {
 			initErr = fmt.Errorf("failed to create data directory: %w", err)
 			return
 		}

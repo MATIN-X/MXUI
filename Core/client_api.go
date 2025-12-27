@@ -13,13 +13,13 @@ import (
 
 // ClientMessage represents a message from panel to client
 type ClientMessage struct {
-	ID        int64     `json:"id" db:"id"`
-	Title     string    `json:"title" db:"title"`
-	Message   string    `json:"message" db:"message"`
-	Type      string    `json:"type" db:"type"` // info, warning, alert, promo
-	Recipients string   `json:"recipients" db:"recipients"` // all, active, expired, user_id
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	ExpiresAt *time.Time `json:"expires_at,omitempty" db:"expires_at"`
+	ID         int64      `json:"id" db:"id"`
+	Title      string     `json:"title" db:"title"`
+	Message    string     `json:"message" db:"message"`
+	Type       string     `json:"type" db:"type"` // info, warning, alert, promo
+	Recipients string     `json:"recipients" db:"recipients"` // all, active, expired, user_id
+	CreatedAt  time.Time  `json:"created_at" db:"created_at"`
+	ExpiresAt  *time.Time `json:"expires_at,omitempty" db:"expires_at"`
 }
 
 // ClientNotificationResponse response for client notifications
@@ -29,12 +29,12 @@ type ClientNotificationResponse struct {
 
 // ClientNotification notification for client
 type ClientNotification struct {
-	ID        int64     `json:"id"`
-	Title     string    `json:"title"`
-	Message   string    `json:"message"`
-	Type      string    `json:"type"`
-	CreatedAt string    `json:"created_at"`
-	IsRead    bool      `json:"is_read"`
+	ID        int64                  `json:"id"`
+	Title     string                 `json:"title"`
+	Message   string                 `json:"message"`
+	Type      string                 `json:"type"`
+	CreatedAt string                 `json:"created_at"`
+	IsRead    bool                   `json:"is_read"`
 	Extra     map[string]interface{} `json:"extra,omitempty"`
 }
 
@@ -42,29 +42,40 @@ type ClientNotification struct {
 // CLIENT API HANDLERS
 // ============================================================================
 
-// registerClientRoutes registers client-specific API routes
-func registerClientRoutes(r *Router) {
+// RegisterClientRoutes registers client-specific API routes
+func (api *APIServer) RegisterClientRoutes(router *Router) {
 	// Public endpoints (for subscription link access)
-	r.GET("/api/v1/sub/:token", handleGetSubscription)
-	r.GET("/api/v1/sub/:token/configs", handleGetSubscriptionConfigs)
+	router.GET("/api/v1/sub/:token", api.handleGetSubscription)
+	router.GET("/api/v1/sub/:token/configs", api.handleGetSubscriptionConfigs)
 
-	// Authenticated client endpoints
-	r.GET("/api/v1/client/notifications", authMiddleware(handleClientNotifications))
-	r.POST("/api/v1/client/notifications/:id/read", authMiddleware(handleMarkNotificationRead))
-	r.GET("/api/v1/client/status", authMiddleware(handleClientStatus))
-	r.GET("/api/v1/client/servers", authMiddleware(handleClientServers))
-	r.POST("/api/v1/client/ping", authMiddleware(handleClientPing))
+	// Create authenticated client group
+	clientGroup := router.Group("/api/v1/client")
+	clientGroup.Use(AuthMiddlewareHandler())
+
+	clientGroup.GET("/notifications", api.handleClientNotifications)
+	clientGroup.POST("/notifications/:id/read", api.handleMarkNotificationRead)
+	clientGroup.GET("/status", api.handleClientStatus)
+	clientGroup.GET("/servers", api.handleClientServers)
+	clientGroup.POST("/ping", api.handleClientPing)
+
+	// Admin endpoints for managing client messages
+	adminGroup := router.Group("/api/v1/admin/client")
+	adminGroup.Use(AuthMiddlewareHandler())
+	adminGroup.Use(OwnerOnlyMiddlewareHandler())
+
+	adminGroup.POST("/messages", api.handleSendClientMessage)
+	adminGroup.GET("/messages", api.handleGetClientMessages)
 }
 
 // handleGetSubscription returns subscription info for a user token
-func handleGetSubscription(c *Context) {
+func (api *APIServer) handleGetSubscription(c *Context) {
 	token := c.Params["token"]
 	if token == "" {
 		c.JSON(http.StatusBadRequest, APIResponse{Error: "Token required"})
 		return
 	}
 
-	user := Users.GetUserBySubToken(token)
+	user := api.users.GetUserBySubToken(token)
 	if user == nil {
 		c.JSON(http.StatusNotFound, APIResponse{Error: "Subscription not found"})
 		return
@@ -77,33 +88,33 @@ func handleGetSubscription(c *Context) {
 	}
 
 	response := map[string]interface{}{
-		"username":    user.Username,
-		"status":      user.Status,
-		"expire":      user.Expire,
-		"data_limit":  user.DataLimit,
+		"username":     user.Username,
+		"status":       user.Status,
+		"expire":       user.Expire,
+		"data_limit":   user.DataLimit,
 		"used_traffic": user.UsedTraffic,
-		"created_at":  user.CreatedAt,
+		"created_at":   user.CreatedAt,
 	}
 
 	c.JSON(http.StatusOK, response)
 }
 
 // handleGetSubscriptionConfigs returns VPN configs for a subscription
-func handleGetSubscriptionConfigs(c *Context) {
+func (api *APIServer) handleGetSubscriptionConfigs(c *Context) {
 	token := c.Params["token"]
 	if token == "" {
 		c.JSON(http.StatusBadRequest, APIResponse{Error: "Token required"})
 		return
 	}
 
-	user := Users.GetUserBySubToken(token)
+	user := api.users.GetUserBySubToken(token)
 	if user == nil {
 		c.JSON(http.StatusNotFound, APIResponse{Error: "Subscription not found"})
 		return
 	}
 
 	// Generate configs for the user
-	configs := generateUserConfigs(user)
+	configs := api.generateUserConfigs(user)
 
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"configs": configs,
@@ -111,7 +122,7 @@ func handleGetSubscriptionConfigs(c *Context) {
 }
 
 // handleClientNotifications returns notifications for the client
-func handleClientNotifications(c *Context) {
+func (api *APIServer) handleClientNotifications(c *Context) {
 	// Get since parameter
 	sinceID := int64(0)
 	if sinceStr := c.Query["since"]; sinceStr != "" {
@@ -124,7 +135,7 @@ func handleClientNotifications(c *Context) {
 	userID := c.Claims.UserID
 
 	// Get notifications from database
-	notifications, err := getClientNotifications(userID, sinceID)
+	notifications, err := api.getClientNotifications(userID, sinceID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, APIResponse{Error: "Failed to get notifications"})
 		return
@@ -136,7 +147,7 @@ func handleClientNotifications(c *Context) {
 }
 
 // handleMarkNotificationRead marks a notification as read
-func handleMarkNotificationRead(c *Context) {
+func (api *APIServer) handleMarkNotificationRead(c *Context) {
 	notificationID, err := strconv.ParseInt(c.Params["id"], 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, APIResponse{Error: "Invalid notification ID"})
@@ -145,7 +156,7 @@ func handleMarkNotificationRead(c *Context) {
 
 	userID := c.Claims.UserID
 
-	err = markNotificationRead(userID, notificationID)
+	err = api.markNotificationRead(userID, notificationID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, APIResponse{Error: "Failed to mark as read"})
 		return
@@ -155,10 +166,10 @@ func handleMarkNotificationRead(c *Context) {
 }
 
 // handleClientStatus returns current status for the client
-func handleClientStatus(c *Context) {
+func (api *APIServer) handleClientStatus(c *Context) {
 	userID := c.Claims.UserID
 
-	user, err := Users.GetUserByID(userID)
+	user, err := api.users.GetUserByID(userID)
 	if err != nil || user == nil {
 		c.JSON(http.StatusNotFound, APIResponse{Error: "User not found"})
 		return
@@ -196,19 +207,12 @@ func handleClientStatus(c *Context) {
 }
 
 // handleClientServers returns available servers for the client
-func handleClientServers(c *Context) {
+func (api *APIServer) handleClientServers(c *Context) {
 	userID := c.Claims.UserID
 
-	user, err := Users.GetUserByID(userID)
+	user, err := api.users.GetUserByID(userID)
 	if err != nil || user == nil {
 		c.JSON(http.StatusNotFound, APIResponse{Error: "User not found"})
-		return
-	}
-
-	// Get available nodes
-	nodes, err := Nodes.ListNodes(&NodeFilter{Status: "online"})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, APIResponse{Error: "Failed to get servers"})
 		return
 	}
 
@@ -224,16 +228,21 @@ func handleClientServers(c *Context) {
 		"load":     0,
 	})
 
-	// Add other nodes
-	for _, node := range nodes.Nodes {
-		servers = append(servers, map[string]interface{}{
-			"id":       node.ID,
-			"name":     node.Name,
-			"location": node.Address,
-			"status":   node.Status,
-			"ping":     node.Ping,
-			"load":     node.Load,
-		})
+	// Get available nodes if nodes manager is initialized
+	if api.nodes != nil {
+		nodes, err := api.nodes.ListNodes(&NodeFilter{Status: "online"})
+		if err == nil {
+			for _, node := range nodes.Nodes {
+				servers = append(servers, map[string]interface{}{
+					"id":       node.ID,
+					"name":     node.Name,
+					"location": node.Address,
+					"status":   node.Status,
+					"ping":     node.Ping,
+					"load":     node.Load,
+				})
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, map[string]interface{}{
@@ -242,11 +251,13 @@ func handleClientServers(c *Context) {
 }
 
 // handleClientPing handles client ping/heartbeat
-func handleClientPing(c *Context) {
+func (api *APIServer) handleClientPing(c *Context) {
 	userID := c.Claims.UserID
 
 	// Update last seen
-	_ = Users.UpdateLastSeen(userID)
+	if api.users != nil {
+		_ = api.users.UpdateLastSeen(userID)
+	}
 
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "ok",
@@ -259,29 +270,34 @@ func handleClientPing(c *Context) {
 // ============================================================================
 
 // generateUserConfigs generates VPN configs for a user
-func generateUserConfigs(user *User) []map[string]interface{} {
+func (api *APIServer) generateUserConfigs(user *User) []map[string]interface{} {
 	configs := make([]map[string]interface{}, 0)
 
-	// Get subscription links
-	subLinks := Users.GetUserLinks(user.ID)
-
-	for i, link := range subLinks {
-		configs = append(configs, map[string]interface{}{
-			"id":       i + 1,
-			"name":     link.Name,
-			"protocol": link.Protocol,
-			"address":  link.Address,
-			"port":     link.Port,
-			"link":     link.Link,
-		})
+	// Get subscription links if users manager is available
+	if api.users != nil {
+		subLinks := api.users.GetUserLinks(user.ID)
+		for i, link := range subLinks {
+			configs = append(configs, map[string]interface{}{
+				"id":       i + 1,
+				"name":     link.Name,
+				"protocol": link.Protocol,
+				"address":  link.Address,
+				"port":     link.Port,
+				"link":     link.Link,
+			})
+		}
 	}
 
 	return configs
 }
 
 // getClientNotifications gets notifications for a client user
-func getClientNotifications(userID int64, sinceID int64) ([]ClientNotification, error) {
+func (api *APIServer) getClientNotifications(userID int64, sinceID int64) ([]ClientNotification, error) {
 	notifications := make([]ClientNotification, 0)
+
+	if DB == nil || DB.db == nil {
+		return notifications, nil
+	}
 
 	query := `
 		SELECT id, title, message, type, created_at
@@ -292,7 +308,7 @@ func getClientNotifications(userID int64, sinceID int64) ([]ClientNotification, 
 		LIMIT 50
 	`
 
-	rows, err := DB.Query(query, sinceID, strconv.FormatInt(userID, 10), time.Now())
+	rows, err := DB.db.Query(query, sinceID, strconv.FormatInt(userID, 10), time.Now())
 	if err != nil {
 		return notifications, err
 	}
@@ -319,13 +335,17 @@ func getClientNotifications(userID int64, sinceID int64) ([]ClientNotification, 
 }
 
 // markNotificationRead marks a notification as read for a user
-func markNotificationRead(userID int64, notificationID int64) error {
+func (api *APIServer) markNotificationRead(userID int64, notificationID int64) error {
+	if DB == nil || DB.db == nil {
+		return nil
+	}
+
 	query := `
 		INSERT INTO notification_reads (user_id, notification_id, read_at)
 		VALUES (?, ?, ?)
 		ON CONFLICT DO NOTHING
 	`
-	_, err := DB.Exec(query, userID, notificationID, time.Now())
+	_, err := DB.db.Exec(query, userID, notificationID, time.Now())
 	return err
 }
 
@@ -335,6 +355,10 @@ func markNotificationRead(userID int64, notificationID int64) error {
 
 // CreateClientMessage creates a new message for clients
 func CreateClientMessage(title, message, msgType, recipients string, expiresAt *time.Time) (*ClientMessage, error) {
+	if DB == nil || DB.db == nil {
+		return nil, nil
+	}
+
 	msg := &ClientMessage{
 		Title:      title,
 		Message:    message,
@@ -349,7 +373,7 @@ func CreateClientMessage(title, message, msgType, recipients string, expiresAt *
 		VALUES (?, ?, ?, ?, ?, ?)
 	`
 
-	result, err := DB.Exec(query, msg.Title, msg.Message, msg.Type, msg.Recipients, msg.CreatedAt, msg.ExpiresAt)
+	result, err := DB.db.Exec(query, msg.Title, msg.Message, msg.Type, msg.Recipients, msg.CreatedAt, msg.ExpiresAt)
 	if err != nil {
 		return nil, err
 	}
@@ -362,6 +386,10 @@ func CreateClientMessage(title, message, msgType, recipients string, expiresAt *
 func GetClientMessages(limit int) ([]ClientMessage, error) {
 	messages := make([]ClientMessage, 0)
 
+	if DB == nil || DB.db == nil {
+		return messages, nil
+	}
+
 	query := `
 		SELECT id, title, message, type, recipients, created_at, expires_at
 		FROM client_messages
@@ -369,7 +397,7 @@ func GetClientMessages(limit int) ([]ClientMessage, error) {
 		LIMIT ?
 	`
 
-	rows, err := DB.Query(query, limit)
+	rows, err := DB.db.Query(query, limit)
 	if err != nil {
 		return messages, err
 	}
@@ -388,7 +416,7 @@ func GetClientMessages(limit int) ([]ClientMessage, error) {
 }
 
 // handleSendClientMessage handles sending a message to clients (admin endpoint)
-func handleSendClientMessage(c *Context) {
+func (api *APIServer) handleSendClientMessage(c *Context) {
 	var req struct {
 		Title      string `json:"title"`
 		Message    string `json:"message"`
@@ -430,7 +458,7 @@ func handleSendClientMessage(c *Context) {
 }
 
 // handleGetClientMessages handles getting all client messages (admin endpoint)
-func handleGetClientMessages(c *Context) {
+func (api *APIServer) handleGetClientMessages(c *Context) {
 	limitStr := c.Query["limit"]
 	limit := 50
 	if limitStr != "" {
