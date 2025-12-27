@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=MX-UI
+Comment=Enterprise VPN Panel Client
+Exec=mxui_client
+Icon=mxui_client
+Categories=Network;
+Terminal=false
+StartupNotify=true
