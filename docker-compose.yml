@@ -1,0 +1,269 @@
+#===============================================================================
+#
+#          FILE: docker-compose.yml
+#
+#   DESCRIPTION: MX-UI VPN Panel Docker Compose Configuration
+#
+#        AUTHOR: MX-UI Team
+#       VERSION: 1.0.0
+#
+#   USAGE:
+#       docker compose up -d        # Start services
+#       docker compose down         # Stop services
+#       docker compose logs -f      # View logs
+#       docker compose restart      # Restart services
+#
+#===============================================================================
+
+version: '3.8'
+
+services:
+  #=============================================================================
+  # MX-UI Panel Service
+  #=============================================================================
+  mxui:
+    image: ghcr.io/matin-x/mxui:latest
+    container_name: mxui
+    restart: unless-stopped
+    
+    # Use host network for VPN functionality
+    network_mode: host
+    
+    # Alternative: Use bridge network (requires port mapping)
+    # networks:
+    #   - mxui-network
+    # ports:
+    #   - "8443:8443"     # Panel web interface
+    #   - "8080:8080"     # API server
+    #   - "443:443"       # HTTPS/TLS
+    #   - "80:80"         # HTTP
+    #   - "51820:51820/udp"  # WireGuard
+    
+    volumes:
+      # Data persistence
+      - mxui-data:/app/data
+      
+      # Logs
+      - mxui-logs:/app/logs
+      
+      # SSL certificates
+      - mxui-certs:/app/certs
+      
+      # Backups
+      - mxui-backups:/app/backups
+      
+      # Custom configuration (optional)
+      # - ./config.yaml:/app/config.yaml:ro
+      
+      # Timezone
+      - /etc/localtime:/etc/localtime:ro
+      
+      # For WireGuard support (optional)
+      # - /lib/modules:/lib/modules:ro
+    
+    environment:
+      # Server settings
+      - MXUI_HOST=0.0.0.0
+      - MXUI_PORT=${MXUI_PORT:-8443}
+      - MXUI_API_PORT=${MXUI_API_PORT:-8080}
+      
+      # Admin credentials
+      - MXUI_ADMIN_USER=${MXUI_ADMIN_USER:-admin}
+      - MXUI_ADMIN_PASS=${MXUI_ADMIN_PASS:-}
+      
+      # Database
+      - MXUI_DB_TYPE=sqlite
+      - MXUI_DB_PATH=/app/data/mxui.db
+      - MXUI_DB_ENCRYPTION_KEY=${MXUI_DB_ENCRYPTION_KEY:-}
+      
+      # Security
+      - MXUI_JWT_SECRET=${MXUI_JWT_SECRET:-}
+      - MXUI_API_KEY=${MXUI_API_KEY:-}
+      
+      # SSL (if using auto TLS)
+      - MXUI_SSL_ENABLED=${MXUI_SSL_ENABLED:-false}
+      - MXUI_DOMAIN=${MXUI_DOMAIN:-}
+      - MXUI_AUTO_TLS=${MXUI_AUTO_TLS:-false}
+      
+      # WARP
+      - MXUI_WARP_ENABLED=${MXUI_WARP_ENABLED:-false}
+      - MXUI_WARP_LICENSE=${MXUI_WARP_LICENSE:-}
+      
+      # Telegram Bot
+      - MXUI_BOT_ENABLED=${MXUI_BOT_ENABLED:-false}
+      - MXUI_BOT_TOKEN=${MXUI_BOT_TOKEN:-}
+      
+      # AI
+      - MXUI_AI_ENABLED=${MXUI_AI_ENABLED:-false}
+      - MXUI_AI_API_KEY=${MXUI_AI_API_KEY:-}
+      
+      # Logging
+      - MXUI_LOG_LEVEL=${MXUI_LOG_LEVEL:-info}
+      
+      # Timezone
+      - TZ=${TZ:-UTC}
+      
+      # Go settings
+      - GOGC=100
+      - GOMAXPROCS=
+    
+    # Required capabilities for VPN functionality
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_MODULE
+    
+    # Sysctls for network
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.forwarding=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:false
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:${MXUI_PORT:-8443}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    
+    # Resource limits (optional)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 2G
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 256M
+    
+    # Labels
+    labels:
+      - "com.mxui.description=MX-UI VPN Panel"
+      - "com.mxui.version=1.0.0"
+
+  #=============================================================================
+  # PostgreSQL Database (Optional - for high-traffic deployments)
+  #=============================================================================
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: mxui-postgres
+  #   restart: unless-stopped
+  #   networks:
+  #     - mxui-network
+  #   volumes:
+  #     - mxui-postgres:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER:-mxui}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-mxui_secure_password}
+  #     - POSTGRES_DB=${POSTGRES_DB:-mxui}
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mxui}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  #=============================================================================
+  # Redis Cache (Optional - for session storage)
+  #=============================================================================
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: mxui-redis
+  #   restart: unless-stopped
+  #   networks:
+  #     - mxui-network
+  #   volumes:
+  #     - mxui-redis:/data
+  #   command: redis-server --appendonly yes
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  #=============================================================================
+  # Nginx Reverse Proxy (Optional)
+  #=============================================================================
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: mxui-nginx
+  #   restart: unless-stopped
+  #   networks:
+  #     - mxui-network
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - mxui-certs:/etc/nginx/certs:ro
+  #   depends_on:
+  #     - mxui
+  #   healthcheck:
+  #     test: ["CMD", "nginx", "-t"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+
+  #=============================================================================
+  # Watchtower (Optional - Auto update)
+  #=============================================================================
+  # watchtower:
+  #   image: containrrr/watchtower
+  #   container_name: mxui-watchtower
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   environment:
+  #     - WATCHTOWER_CLEANUP=true
+  #     - WATCHTOWER_POLL_INTERVAL=86400
+  #     - WATCHTOWER_INCLUDE_STOPPED=true
+  #   command: mxui
+
+#===============================================================================
+# Networks
+#===============================================================================
+networks:
+  mxui-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+#===============================================================================
+# Volumes
+#===============================================================================
+volumes:
+  mxui-data:
+    name: mxui-data
+    driver: local
+  
+  mxui-logs:
+    name: mxui-logs
+    driver: local
+  
+  mxui-certs:
+    name: mxui-certs
+    driver: local
+  
+  mxui-backups:
+    name: mxui-backups
+    driver: local
+  
+  # mxui-postgres:
+  #   name: mxui-postgres
+  #   driver: local
+  
+  # mxui-redis:
+  #   name: mxui-redis
+  #   driver: local

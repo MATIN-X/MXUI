@@ -1,0 +1,836 @@
+#===============================================================================
+#
+#          FILE: config.yaml
+#
+#   DESCRIPTION: MX-UI VPN Panel Configuration File
+#                This is the main configuration file for MX-UI Panel
+#
+#        AUTHOR: MX-UI Team
+#       VERSION: 2.0.0
+#
+#===============================================================================
+
+#===============================================================================
+# Server Settings
+#===============================================================================
+server:
+  # Host to bind (0.0.0.0 for all interfaces)
+  host: "0.0.0.0"
+  
+  # Panel web interface port
+  port: 8443
+  
+  # API server port
+  api_port: 8080
+  
+  # Base path for panel (use "/" for root)
+  base_path: "/"
+  
+  # Enable debug mode (disable in production)
+  debug: false
+  
+  # Graceful shutdown timeout
+  shutdown_timeout: "30s"
+  
+  # Read/Write timeouts
+  read_timeout: "60s"
+  write_timeout: "60s"
+  idle_timeout: "120s"
+
+#===============================================================================
+# Database Settings
+#===============================================================================
+database:
+  # Database type (sqlite, postgres, mysql)
+  type: "sqlite"
+  
+  # SQLite file path
+  path: "/opt/mxui/data/mxui.db"
+  
+  # Database encryption key (32 hex characters)
+  # Generate with: openssl rand -hex 32
+  encryption_key: ""
+  
+  # Connection pool settings
+  max_connections: 10
+  max_idle_connections: 5
+  connection_lifetime: "1h"
+  
+  # Log SQL queries (for debugging)
+  log_queries: false
+
+  # PostgreSQL/MySQL settings (if not using SQLite)
+  # host: "localhost"
+  # port: 5432
+  # name: "mxui"
+  # user: "mxui"
+  # password: ""
+  # ssl_mode: "disable"
+
+#===============================================================================
+# Security Settings
+#===============================================================================
+security:
+  # JWT secret key (64 hex characters)
+  # Generate with: openssl rand -hex 32
+  jwt_secret: ""
+  
+  # JWT token expiry duration
+  jwt_expiry: "24h"
+  
+  # Refresh token expiry
+  refresh_expiry: "168h"
+  
+  # API key for external access
+  api_key: ""
+  
+  # Enable Two-Factor Authentication
+  enable_2fa: false
+  
+  # IP whitelist for panel access (empty = allow all)
+  ip_whitelist: []
+  # ip_whitelist:
+  #   - "192.168.1.0/24"
+  #   - "10.0.0.1"
+  
+  # Brute-force protection
+  brute_force_protection:
+    enabled: true
+    max_attempts: 5
+    lock_duration: "15m"
+    reset_after: "1h"
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+    burst: 100
+  
+  # Session settings
+  session:
+    cookie_name: "mxui_session"
+    secure: false
+    http_only: true
+    same_site: "lax"
+    max_age: 86400
+
+  # CORS settings
+  cors:
+    enabled: false
+    allowed_origins:
+      - "*"
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "OPTIONS"
+    allowed_headers:
+      - "*"
+
+#===============================================================================
+# Admin Settings
+#===============================================================================
+admin:
+  # Super admin username
+  username: "admin"
+  
+  # Super admin password
+  password: ""
+  
+  # Admin email (for notifications)
+  email: ""
+  
+  # Telegram ID (for notifications)
+  telegram_id: ""
+
+#===============================================================================
+# SSL/TLS Settings
+#===============================================================================
+ssl:
+  # Enable HTTPS
+  enabled: false
+  
+  # SSL certificate file path
+  cert_file: "/opt/mxui/certs/cert.pem"
+  
+  # SSL private key file path
+  key_file: "/opt/mxui/certs/key.pem"
+  
+  # Auto TLS with Let's Encrypt
+  auto_tls: false
+  
+  # Domain for auto TLS
+  domain: ""
+  
+  # ACME email for Let's Encrypt
+  acme_email: ""
+  
+  # Redirect HTTP to HTTPS
+  redirect_http: true
+  
+  # HTTP port for redirect
+  http_port: 80
+  
+  # Minimum TLS version (1.2, 1.3)
+  min_version: "1.2"
+
+#===============================================================================
+# Core Settings - Protocol Engines
+#===============================================================================
+core:
+  # Active core engine (xray, singbox, clash)
+  active: "xray"
+  
+  # Xray-core settings
+  xray:
+    enabled: true
+    executable: "/opt/mxui/bin/xray"
+    config_path: "/opt/mxui/data/xray_config.json"
+    asset_path: "/opt/mxui/data"
+    log_level: "warning"
+    # Log levels: debug, info, warning, error, none
+    
+    # Access log
+    access_log: "/opt/mxui/logs/xray_access.log"
+    error_log: "/opt/mxui/logs/xray_error.log"
+    
+    # Buffer size
+    buffer_size: 16384
+    
+    # DNS settings
+    dns:
+      servers:
+        - "8.8.8.8"
+        - "1.1.1.1"
+      hosts: {}
+  
+  # Sing-box settings
+  singbox:
+    enabled: false
+    executable: "/opt/mxui/bin/sing-box"
+    config_path: "/opt/mxui/data/singbox_config.json"
+    log_level: "warn"
+  
+  # Clash Meta settings
+  clash:
+    enabled: false
+    executable: "/opt/mxui/bin/clash"
+    config_path: "/opt/mxui/data/clash_config.yaml"
+    external_controller: "127.0.0.1:9090"
+    secret: ""
+  
+  # WireGuard settings
+  wireguard:
+    enabled: false
+    interface: "wg0"
+    config_path: "/etc/wireguard/wg0.conf"
+    listen_port: 51820
+    private_key: ""
+    address: "10.66.66.1/24"
+    dns: "1.1.1.1"
+
+#===============================================================================
+# Protocols Configuration
+#===============================================================================
+protocols:
+  # VMess
+  vmess:
+    enabled: true
+    alter_id: 0
+  
+  # VLESS
+  vless:
+    enabled: true
+  
+  # Trojan
+  trojan:
+    enabled: true
+  
+  # Shadowsocks
+  shadowsocks:
+    enabled: true
+    method: "2022-blake3-aes-128-gcm"
+    # methods: aes-256-gcm, aes-128-gcm, chacha20-poly1305, 2022-blake3-*
+  
+  # Hysteria2
+  hysteria2:
+    enabled: false
+    up_mbps: 100
+    down_mbps: 100
+  
+  # TUIC
+  tuic:
+    enabled: false
+    congestion_control: "bbr"
+  
+  # WireGuard
+  wireguard:
+    enabled: false
+
+#===============================================================================
+# Transport Configuration
+#===============================================================================
+transport:
+  # WebSocket
+  websocket:
+    path: "/ws"
+    max_early_data: 2048
+    early_data_header: "Sec-WebSocket-Protocol"
+  
+  # gRPC
+  grpc:
+    service_name: "GunService"
+    multi_mode: true
+  
+  # HTTP/2
+  http2:
+    path: "/h2"
+    host: ""
+  
+  # QUIC
+  quic:
+    security: "none"
+    key: ""
+    header_type: "none"
+  
+  # TCP
+  tcp:
+    header_type: "none"
+    # header_type: none, http
+  
+  # mKCP
+  mkcp:
+    header_type: "none"
+    seed: ""
+    # header_types: none, srtp, utp, wechat-video, dtls, wireguard
+
+#===============================================================================
+# Security Layer Configuration  
+#===============================================================================
+security_layer:
+  # TLS settings
+  tls:
+    server_name: ""
+    fingerprint: "chrome"
+    # fingerprints: chrome, firefox, safari, ios, android, edge, 360, qq, random, randomized
+    allow_insecure: false
+    alpn:
+      - "h2"
+      - "http/1.1"
+  
+  # Reality settings
+  reality:
+    server_name: ""
+    fingerprint: "chrome"
+    public_key: ""
+    short_id: ""
+    spider_x: "/"
+    # dest: "www.google.com:443"
+
+#===============================================================================
+# WARP Configuration
+#===============================================================================
+warp:
+  # Enable WARP
+  enabled: false
+  
+  # WARP+ license key (optional)
+  license_key: ""
+  
+  # WARP endpoint
+  endpoint: "engage.cloudflareclient.com:2408"
+  
+  # Reserved bytes (for custom WARP configs)
+  reserved: []
+  
+  # MTU size
+  mtu: 1280
+  
+  # Domains to route through WARP
+  domains:
+    - "openai.com"
+    - "chat.openai.com"
+    - "netflix.com"
+    - "spotify.com"
+  
+  # Enable WARP for all traffic
+  global: false
+
+#===============================================================================
+# Routing Configuration
+#===============================================================================
+routing:
+  # Domain strategy
+  domain_strategy: "IPIfNonMatch"
+  # strategies: AsIs, IPIfNonMatch, IPOnDemand
+  
+  # Rules
+  rules:
+    # Block ads
+    block_ads: true
+    
+    # Block malware
+    block_malware: true
+    
+    # Block porn
+    block_porn: false
+    
+    # Direct domestic traffic (Iran)
+    direct_domestic: true
+    
+    # Block BitTorrent
+    block_torrent: true
+  
+  # GeoIP file path
+  geoip_path: "/opt/mxui/data/geoip.dat"
+  
+  # GeoSite file path
+  geosite_path: "/opt/mxui/data/geosite.dat"
+  
+  # Custom block hosts
+  block_hosts: []
+  # block_hosts:
+  #   - "domain:facebook.com"
+  #   - "keyword:porn"
+  
+  # Custom direct hosts
+  direct_hosts: []
+  # direct_hosts:
+  #   - "domain:ir"
+  #   - "geosite:category-ir"
+  
+  # Custom proxy hosts
+  proxy_hosts: []
+
+#===============================================================================
+# Inbound Configuration
+#===============================================================================
+inbounds:
+  # Default inbounds
+  defaults:
+    - tag: "vmess-ws"
+      protocol: "vmess"
+      port: 443
+      transport: "websocket"
+      security: "tls"
+      enabled: true
+    
+    - tag: "vless-reality"
+      protocol: "vless"
+      port: 8443
+      transport: "tcp"
+      security: "reality"
+      enabled: true
+
+#===============================================================================
+# Outbound Configuration
+#===============================================================================
+outbounds:
+  # Freedom outbound (direct)
+  freedom:
+    tag: "direct"
+    domain_strategy: "UseIP"
+  
+  # Blackhole outbound (block)
+  blackhole:
+    tag: "block"
+    response_type: "none"
+  
+  # WARP outbound
+  warp:
+    tag: "warp"
+    enabled: false
+
+#===============================================================================
+# Node Management
+#===============================================================================
+nodes:
+  # Sync interval for multi-node setup
+  sync_interval: "30s"
+  
+  # Health check interval
+  health_check_interval: "60s"
+  
+  # Connection timeout
+  timeout: "10s"
+  
+  # Retry count for failed connections
+  retry_count: 3
+  
+  # Load balancing strategy (round-robin, least-conn, random)
+  load_balance: "round-robin"
+  
+  # Enable failover
+  failover: true
+  
+  # Node list (for slave nodes)
+  # list:
+  #   - name: "Node-1"
+  #     address: "192.168.1.100"
+  #     port: 8080
+  #     api_key: "node-api-key"
+  #     enabled: true
+
+#===============================================================================
+# Backup Configuration
+#===============================================================================
+backup:
+  # Enable auto backup
+  auto_backup: true
+  
+  # Backup schedule (cron format)
+  # Default: 3 AM daily
+  schedule: "0 3 * * *"
+  
+  # Retention days
+  retention_days: 7
+  
+  # Backup path
+  path: "/opt/mxui/backups"
+  
+  # Include logs in backup
+  include_logs: false
+  
+  # Compress backup
+  compress: true
+  
+  # Destinations
+  destinations:
+    # Telegram backup
+    telegram:
+      enabled: false
+      bot_token: ""
+      chat_id: ""
+      # Max file size for Telegram (50MB)
+      max_file_size: 52428800
+    
+    # Google Drive backup
+    google_drive:
+      enabled: false
+      credentials_path: ""
+      folder_id: ""
+    
+    # AWS S3 backup
+    s3:
+      enabled: false
+      bucket: ""
+      region: ""
+      access_key: ""
+      secret_key: ""
+      endpoint: ""
+
+#===============================================================================
+# Telegram Bot Configuration
+#===============================================================================
+telegram_bot:
+  # Enable Telegram bot
+  enabled: false
+  
+  # Bot token from @BotFather
+  token: ""
+  
+  # Bot admins (Telegram user IDs)
+  admins: []
+  
+  # Bot mode (polling, webhook)
+  mode: "polling"
+  
+  # Webhook settings
+  webhook:
+    url: ""
+    port: 8443
+    cert_path: ""
+  
+  # Commands
+  commands:
+    start: true
+    help: true
+    me: true
+    usage: true
+    configs: true
+    buy: true
+    support: true
+  
+  # Notifications
+  notifications:
+    # Notify when user connects
+    on_connect: false
+    
+    # Notify before expiry (days)
+    on_expiry: true
+    expiry_days: [3, 1]
+    
+    # Notify on traffic limit
+    on_traffic_limit: true
+    traffic_percent: [80, 90, 100]
+    
+    # Notify admin on new purchase
+    on_purchase: true
+    
+    # Notify on node status change
+    on_node_status: true
+  
+  # Payment settings
+  payments:
+    enabled: false
+    # Supported: zarinpal, idpay, nextpay, crypto
+    gateways: []
+  
+  # Support settings
+  support:
+    username: ""
+    channel: ""
+
+#===============================================================================
+# AI Configuration
+#===============================================================================
+ai:
+  # Enable AI features
+  enabled: false
+  
+  # AI provider (openai, anthropic, local)
+  provider: "openai"
+  
+  # API key
+  api_key: ""
+  
+  # Model to use
+  model: "gpt-4"
+  
+  # Features
+  features:
+    # Suggest optimal protocols
+    suggestions: true
+    
+    # Optimize configurations
+    optimization: true
+    
+    # Predict issues
+    prediction: true
+    
+    # Analyze user behavior
+    behavior_analysis: true
+  
+  # Smart notifications
+  smart_notifications:
+    enabled: false
+    # Check interval
+    interval: "1h"
+
+#===============================================================================
+# Logging Configuration
+#===============================================================================
+logging:
+  # Log level (debug, info, warn, error)
+  level: "info"
+  
+  # Log file path
+  file: "/opt/mxui/logs/mxui.log"
+  
+  # Max size in MB before rotation
+  max_size: 100
+  
+  # Max number of old log files
+  max_backups: 3
+  
+  # Max age in days
+  max_age: 30
+  
+  # Compress old logs
+  compress: true
+  
+  # Log format (json, text)
+  format: "text"
+  
+  # Include caller info
+  caller: false
+  
+  # Access log
+  access_log:
+    enabled: true
+    file: "/opt/mxui/logs/access.log"
+
+#===============================================================================
+# Panel UI Configuration
+#===============================================================================
+panel:
+  # Panel title
+  title: "MX-UI VPN Panel"
+  
+  # Default language (en, fa, zh, ru)
+  language: "en"
+  
+  # Default theme (dark, light, system)
+  theme: "dark"
+  
+  # Timezone
+  timezone: "UTC"
+  
+  # Date format
+  date_format: "2006-01-02 15:04:05"
+  
+  # Traffic unit (auto, KB, MB, GB, TB)
+  traffic_unit: "auto"
+  
+  # Enable PWA
+  pwa: true
+  
+  # Custom branding
+  branding:
+    logo: ""
+    favicon: ""
+    primary_color: "#6366f1"
+    
+  # Footer
+  footer:
+    enabled: true
+    text: ""
+    links: []
+
+#===============================================================================
+# Subscription Configuration
+#===============================================================================
+subscription:
+  # Base URL for subscription links
+  # Leave empty to auto-detect
+  base_url: ""
+  
+  # Profile title shown in apps
+  profile_title: "MX-UI"
+  
+  # Support URL
+  support_url: ""
+  
+  # Update interval in hours
+  update_interval: 12
+  
+  # Include usage info in subscription
+  include_usage: true
+  
+  # User agent rules
+  user_agents:
+    clash:
+      - "clash"
+      - "Clash"
+    singbox:
+      - "sing-box"
+      - "SFI"
+      - "SFA"
+    v2ray:
+      - "v2ray"
+      - "V2Ray"
+    default: "base64"
+
+#===============================================================================
+# User Settings
+#===============================================================================
+users:
+  # Default traffic limit (0 = unlimited)
+  default_traffic: 0
+  
+  # Default expiry days
+  default_expiry_days: 30
+  
+  # Default device limit (0 = unlimited)
+  default_device_limit: 0
+  
+  # Default concurrent IP limit (0 = unlimited)
+  default_ip_limit: 0
+  
+  # Trial settings
+  trial:
+    enabled: true
+    traffic: 1073741824  # 1 GB
+    duration: 1  # days
+    max_per_ip: 1
+  
+  # Auto-extend settings
+  auto_extend:
+    enabled: false
+    min_balance: 0
+  
+  # Periodic traffic reset
+  periodic_reset:
+    enabled: false
+    # day, week, month
+    interval: "month"
+    day_of_month: 1
+
+#===============================================================================
+# Alert Configuration
+#===============================================================================
+alerts:
+  # Enable alerts
+  enabled: true
+  
+  # Alert channels
+  channels:
+    telegram:
+      enabled: false
+      bot_token: ""
+      chat_id: ""
+    
+    email:
+      enabled: false
+      smtp_host: ""
+      smtp_port: 587
+      smtp_user: ""
+      smtp_pass: ""
+      from: ""
+      to: []
+  
+  # Alert conditions
+  conditions:
+    # CPU usage threshold (%)
+    cpu_threshold: 90
+    
+    # Memory usage threshold (%)
+    memory_threshold: 90
+    
+    # Disk usage threshold (%)
+    disk_threshold: 90
+    
+    # Node offline alert
+    node_offline: true
+    
+    # Service down alert
+    service_down: true
+
+#===============================================================================
+# API Configuration
+#===============================================================================
+api:
+  # Enable public API
+  enabled: true
+  
+  # API prefix
+  prefix: "/api/v1"
+  
+  # API documentation
+  docs: true
+  
+  # Webhooks
+  webhooks:
+    enabled: false
+    # Webhook endpoints
+    endpoints: []
+    # endpoints:
+    #   - url: "https://example.com/webhook"
+    #     events: ["user.created", "user.expired"]
+    #     secret: "webhook-secret"
+
+#===============================================================================
+# Advanced Settings
+#===============================================================================
+advanced:
+  # Enable pprof for debugging
+  pprof: false
+  pprof_port: 6060
+  
+  # Experimental features
+  experimental:
+    enabled: false
+  
+  # Custom environment variables
+  env: {}

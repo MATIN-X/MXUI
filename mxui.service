@@ -1,0 +1,194 @@
+#===============================================================================
+#
+#          FILE: mxui.service
+#
+#   DESCRIPTION: MX-UI VPN Panel Systemd Service Unit File
+#
+#        AUTHOR: MX-UI Team
+#       VERSION: 1.0.0
+#
+#   LOCATION: /etc/systemd/system/mxui.service
+#
+#   COMMANDS:
+#       systemctl enable mxui      - Enable auto-start
+#       systemctl start mxui       - Start service
+#       systemctl stop mxui        - Stop service
+#       systemctl restart mxui     - Restart service
+#       systemctl status mxui      - Check status
+#       journalctl -u mxui -f      - View logs
+#
+#===============================================================================
+
+[Unit]
+Description=MX-UI VPN Panel - Professional VPN Management System
+Documentation=https://github.com/MX-UI-Panel/MX-UI
+After=network.target network-online.target nss-lookup.target
+Wants=network-online.target
+Requires=network.target
+
+# Service dependencies
+After=postgresql.service mysql.service
+Wants=postgresql.service mysql.service
+
+# Conflict with other VPN panels
+Conflicts=marzban.service x-ui.service 3x-ui.service
+
+[Service]
+# Service type
+Type=simple
+
+# User and group
+User=root
+Group=root
+
+# Working directory
+WorkingDirectory=/opt/mxui
+
+# Main executable
+ExecStart=/opt/mxui/bin/mxui --config /opt/mxui/config.yaml
+
+# Reload configuration
+ExecReload=/bin/kill -HUP $MAINPID
+
+# Stop service
+ExecStop=/bin/kill -TERM $MAINPID
+
+# Pre-start script (check requirements)
+ExecStartPre=/bin/bash -c 'test -f /opt/mxui/bin/mxui || (echo "MX-UI binary not found" && exit 1)'
+ExecStartPre=/bin/bash -c 'test -f /opt/mxui/config.yaml || (echo "Config file not found" && exit 1)'
+
+# Post-start script
+ExecStartPost=/bin/bash -c 'sleep 2 && curl -sf http://localhost:8443/health > /dev/null && echo "MX-UI started successfully" || echo "Warning: Health check failed"'
+
+# Restart policy
+Restart=always
+RestartSec=5
+RestartPreventExitStatus=SIGTERM
+
+# Start limit
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Timeout settings
+TimeoutStartSec=30
+TimeoutStopSec=30
+
+# Watchdog
+WatchdogSec=30
+
+#===============================================================================
+# Security Hardening
+#===============================================================================
+
+# Don't allow privilege escalation (disabled for VPN functionality)
+NoNewPrivileges=false
+
+# Private /tmp directory
+PrivateTmp=true
+
+# Protect system directories
+ProtectSystem=false
+ProtectHome=false
+
+# Read-only for critical paths
+ReadOnlyPaths=/etc/os-release /etc/passwd
+
+# Writable paths
+ReadWritePaths=/opt/mxui /var/log
+
+# Limit capabilities
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_SYS_ADMIN
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_RAW
+
+# Lock memory
+LockPersonality=true
+
+# System call filter
+SystemCallArchitectures=native
+
+#===============================================================================
+# Resource Limits
+#===============================================================================
+
+# File descriptor limits
+LimitNOFILE=65535
+
+# Process limits
+LimitNPROC=65535
+
+# Memory limit (0 = unlimited)
+MemoryMax=0
+
+# CPU quota (100% = 1 core)
+CPUQuota=
+
+# IO scheduling
+IOSchedulingClass=best-effort
+IOSchedulingPriority=4
+
+# Nice value
+Nice=0
+
+#===============================================================================
+# Environment
+#===============================================================================
+
+# Environment file
+EnvironmentFile=-/opt/mxui/.env
+
+# Environment variables
+Environment="MXUI_CONFIG=/opt/mxui/config.yaml"
+Environment="MXUI_DATA_DIR=/opt/mxui/data"
+Environment="MXUI_LOG_DIR=/opt/mxui/logs"
+Environment="GOGC=100"
+Environment="GOMAXPROCS="
+
+#===============================================================================
+# Logging
+#===============================================================================
+
+# Standard output/error handling
+StandardOutput=append:/opt/mxui/logs/mxui.log
+StandardError=append:/opt/mxui/logs/mxui_error.log
+
+# Syslog settings
+SyslogIdentifier=mxui
+SyslogFacility=daemon
+SyslogLevel=info
+
+#===============================================================================
+# Process Management
+#===============================================================================
+
+# Kill mode
+KillMode=mixed
+KillSignal=SIGTERM
+
+# Send SIGKILL after timeout
+SendSIGKILL=yes
+
+# Final SIGKILL timeout
+FinalKillSignal=SIGKILL
+
+# OOM score adjustment
+OOMScoreAdjust=-500
+
+# Runtime directory
+RuntimeDirectory=mxui
+RuntimeDirectoryMode=0755
+
+# State directory
+StateDirectory=mxui
+StateDirectoryMode=0750
+
+# Cache directory
+CacheDirectory=mxui
+CacheDirectoryMode=0750
+
+# Logs directory
+LogsDirectory=mxui
+LogsDirectoryMode=0750
+
+[Install]
+WantedBy=multi-user.target
+Alias=mxui-panel.service
