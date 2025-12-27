@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #═══════════════════════════════════════════════════════════════════════════════
-#  MX-UI Unified Installer v2.0.0
+#  MXUI Unified Installer v2.0.0
 #  Professional VPN Panel Installer - Similar to 3x-ui
 #  Supports: Master/Node, Bash/Docker, Install/Update/Uninstall
 #═══════════════════════════════════════════════════════════════════════════════
@@ -25,10 +25,10 @@ BOLD='\033[1m'
 # ═══════════════════════════════════════════════════════════════════════════════
 # GLOBAL VARIABLES
 # ═══════════════════════════════════════════════════════════════════════════════
-PROJ_NAME="MX-UI"
+PROJ_NAME="MXUI"
 VERSION="2.0.0"
-REPO_URL="https://github.com/MATIN-X/MX-UI"
-RELEASE_URL="https://github.com/MATIN-X/MX-UI/releases"
+REPO_URL="https://github.com/MATIN-X/MXUI"
+RELEASE_URL="https://github.com/MATIN-X/MXUI/releases"
 
 # Paths
 INSTALL_DIR="/opt/mxui"
@@ -66,7 +66,7 @@ init_log() {
     touch "$LOG_FILE" 2>/dev/null || LOG_FILE="/tmp/mxui_install.log"
     ln -sf "$LOG_FILE" "$LAST_LOG" 2>/dev/null
     echo "═══════════════════════════════════════════════════════════════" >> "$LOG_FILE"
-    echo "MX-UI Installation Log - $(date)" >> "$LOG_FILE"
+    echo "MXUI Installation Log - $(date)" >> "$LOG_FILE"
     echo "═══════════════════════════════════════════════════════════════" >> "$LOG_FILE"
 }
 
@@ -128,14 +128,14 @@ show_menu() {
     echo -e "${BOLD}                     Main Menu${NC}"
     echo -e "${WHITE}═══════════════════════════════════════════════════════════════════${NC}"
     echo ""
-    echo -e "  ${GREEN}1)${NC} Install MX-UI (Master Panel)"
-    echo -e "  ${GREEN}2)${NC} Install MX-UI Node Only"
-    echo -e "  ${GREEN}3)${NC} Update MX-UI"
-    echo -e "  ${GREEN}4)${NC} Uninstall MX-UI"
+    echo -e "  ${GREEN}1)${NC} Install MXUI (Master Panel)"
+    echo -e "  ${GREEN}2)${NC} Install MXUI Node Only"
+    echo -e "  ${GREEN}3)${NC} Update MXUI"
+    echo -e "  ${GREEN}4)${NC} Uninstall MXUI"
     echo ""
-    echo -e "  ${BLUE}5)${NC} Start MX-UI"
-    echo -e "  ${BLUE}6)${NC} Stop MX-UI"
-    echo -e "  ${BLUE}7)${NC} Restart MX-UI"
+    echo -e "  ${BLUE}5)${NC} Start MXUI"
+    echo -e "  ${BLUE}6)${NC} Stop MXUI"
+    echo -e "  ${BLUE}7)${NC} Restart MXUI"
     echo -e "  ${BLUE}8)${NC} Check Status"
     echo ""
     echo -e "  ${PURPLE}9)${NC} View Logs"
@@ -239,9 +239,9 @@ system_check() {
     echo -e "${WHITE}───────────────────────────────────────────────────────────────────${NC}"
 
     if [[ -f "$CLI_PATH" ]]; then
-        echo -e "  ${CYAN}MX-UI CLI:${NC}   ${GREEN}Installed${NC}"
+        echo -e "  ${CYAN}MXUI CLI:${NC}   ${GREEN}Installed${NC}"
     else
-        echo -e "  ${CYAN}MX-UI CLI:${NC}   ${RED}Not Installed${NC}"
+        echo -e "  ${CYAN}MXUI CLI:${NC}   ${RED}Not Installed${NC}"
     fi
 
     if [[ -d "$INSTALL_DIR" ]]; then
@@ -427,7 +427,7 @@ install_go() {
 # BUILD FROM SOURCE
 # ═══════════════════════════════════════════════════════════════════════════════
 build_from_source() {
-    log_step "Building MX-UI from source..."
+    log_step "Building MXUI from source..."
     save_state "source"
 
     # Install Go if needed
@@ -436,23 +436,23 @@ build_from_source() {
 
     # Clone or download
     cd /tmp
-    rm -rf MX-UI MX-UI.zip
+    rm -rf MXUI MXUI.zip
 
-    if git clone --depth 1 "$REPO_URL" MX-UI >> "$LOG_FILE" 2>&1; then
+    if git clone --depth 1 "$REPO_URL" MXUI >> "$LOG_FILE" 2>&1; then
         log "Repository cloned"
     else
         log_warn "Git clone failed, trying zip download..."
-        wget -q "${REPO_URL}/archive/refs/heads/main.zip" -O MX-UI.zip >> "$LOG_FILE" 2>&1
-        if [[ -f MX-UI.zip ]]; then
-            unzip -q MX-UI.zip >> "$LOG_FILE" 2>&1
-            mv MX-UI-main MX-UI 2>/dev/null || true
+        wget -q "${REPO_URL}/archive/refs/heads/main.zip" -O MXUI.zip >> "$LOG_FILE" 2>&1
+        if [[ -f MXUI.zip ]]; then
+            unzip -q MXUI.zip >> "$LOG_FILE" 2>&1
+            mv MXUI-main MXUI 2>/dev/null || true
         else
             log_error "Failed to download source code"
             return 1
         fi
     fi
 
-    cd MX-UI
+    cd MXUI
 
     # Build binary
     log_step "Compiling binary (this may take a few minutes)..."
@@ -483,9 +483,9 @@ build_from_source() {
     fi
 
     cd /tmp
-    rm -rf MX-UI MX-UI.zip
+    rm -rf MXUI MXUI.zip
 
-    log "MX-UI built and installed"
+    log "MXUI built and installed"
     return 0
 }
 
@@ -579,7 +579,7 @@ configure_panel() {
 
     # Create config file
     cat > "${INSTALL_DIR}/config/config.yaml" << CONFIGEOF
-# MX-UI Configuration
+# MXUI Configuration
 server:
   host: "0.0.0.0"
   port: ${panel_port}
@@ -631,10 +631,10 @@ create_service() {
     log_step "Creating systemd service..."
     save_state "service"
 
-    # Main MX-UI service
+    # Main MXUI service
     cat > /etc/systemd/system/mxui.service << SERVICEEOF
 [Unit]
-Description=MX-UI Panel Service
+Description=MXUI Panel Service
 After=network.target network-online.target
 Wants=network-online.target
 
@@ -655,7 +655,7 @@ SERVICEEOF
     # Xray service
     cat > /etc/systemd/system/mxui-xray.service << XRAYSERVICEEOF
 [Unit]
-Description=MX-UI Xray Core
+Description=MXUI Xray Core
 After=network.target
 
 [Service]
@@ -684,7 +684,7 @@ install_cli() {
     cat > "$CLI_PATH" << 'CLIEOF'
 #!/bin/bash
 
-# MX-UI CLI Management Tool
+# MXUI CLI Management Tool
 VERSION="2.0.0"
 INSTALL_DIR="/opt/mxui"
 CONFIG_FILE="/opt/mxui/config/config.yaml"
@@ -701,7 +701,7 @@ BOLD='\033[1m'
 show_banner() {
     echo -e "${CYAN}"
     echo "╔═══════════════════════════════════════════════════════════════╗"
-    echo "║                    MX-UI Management                           ║"
+    echo "║                    MXUI Management                           ║"
     echo "║                     Version: ${VERSION}                          ║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
@@ -712,9 +712,9 @@ show_help() {
     echo -e "${BOLD}Usage:${NC} mxui [command]"
     echo ""
     echo -e "${BOLD}Commands:${NC}"
-    echo -e "  ${GREEN}start${NC}          Start MX-UI service"
-    echo -e "  ${GREEN}stop${NC}           Stop MX-UI service"
-    echo -e "  ${GREEN}restart${NC}        Restart MX-UI service"
+    echo -e "  ${GREEN}start${NC}          Start MXUI service"
+    echo -e "  ${GREEN}stop${NC}           Stop MXUI service"
+    echo -e "  ${GREEN}restart${NC}        Restart MXUI service"
     echo -e "  ${GREEN}status${NC}         Show service status"
     echo ""
     echo -e "  ${BLUE}log${NC}            Show live logs"
@@ -723,8 +723,8 @@ show_help() {
     echo -e "  ${BLUE}reset${NC}          Reset admin password"
     echo ""
     echo -e "  ${CYAN}install${NC}        Run installer"
-    echo -e "  ${CYAN}update${NC}         Update MX-UI"
-    echo -e "  ${CYAN}uninstall${NC}      Uninstall MX-UI"
+    echo -e "  ${CYAN}update${NC}         Update MXUI"
+    echo -e "  ${CYAN}uninstall${NC}      Uninstall MXUI"
     echo ""
     echo -e "  ${YELLOW}check${NC}          System check"
     echo -e "  ${YELLOW}last-log${NC}       View last installation log"
@@ -739,7 +739,7 @@ show_help() {
 
 check_installed() {
     if [[ ! -d "$INSTALL_DIR" ]] || [[ ! -f "$INSTALL_DIR/bin/mxui" ]]; then
-        echo -e "${YELLOW}MX-UI is not installed.${NC}"
+        echo -e "${YELLOW}MXUI is not installed.${NC}"
         echo -e "Run: ${CYAN}mxui install${NC} to install"
         return 1
     fi
@@ -748,32 +748,32 @@ check_installed() {
 
 start_service() {
     check_installed || return 1
-    echo -e "${CYAN}Starting MX-UI...${NC}"
+    echo -e "${CYAN}Starting MXUI...${NC}"
     systemctl start mxui mxui-xray 2>/dev/null
     sleep 2
     if systemctl is-active --quiet mxui; then
-        echo -e "${GREEN}MX-UI started successfully${NC}"
+        echo -e "${GREEN}MXUI started successfully${NC}"
     else
-        echo -e "${RED}Failed to start MX-UI${NC}"
+        echo -e "${RED}Failed to start MXUI${NC}"
         echo -e "Check logs: ${CYAN}mxui log${NC}"
     fi
 }
 
 stop_service() {
-    echo -e "${CYAN}Stopping MX-UI...${NC}"
+    echo -e "${CYAN}Stopping MXUI...${NC}"
     systemctl stop mxui mxui-xray 2>/dev/null
-    echo -e "${GREEN}MX-UI stopped${NC}"
+    echo -e "${GREEN}MXUI stopped${NC}"
 }
 
 restart_service() {
     check_installed || return 1
-    echo -e "${CYAN}Restarting MX-UI...${NC}"
+    echo -e "${CYAN}Restarting MXUI...${NC}"
     systemctl restart mxui mxui-xray 2>/dev/null
     sleep 2
     if systemctl is-active --quiet mxui; then
-        echo -e "${GREEN}MX-UI restarted successfully${NC}"
+        echo -e "${GREEN}MXUI restarted successfully${NC}"
     else
-        echo -e "${RED}Failed to restart MX-UI${NC}"
+        echo -e "${RED}Failed to restart MXUI${NC}"
     fi
 }
 
@@ -783,9 +783,9 @@ show_status() {
     echo -e "═══════════════════════════════════════════════════════════"
 
     if systemctl is-active --quiet mxui 2>/dev/null; then
-        echo -e "  MX-UI Panel:  ${GREEN}● Running${NC}"
+        echo -e "  MXUI Panel:  ${GREEN}● Running${NC}"
     else
-        echo -e "  MX-UI Panel:  ${RED}○ Stopped${NC}"
+        echo -e "  MXUI Panel:  ${RED}○ Stopped${NC}"
     fi
 
     if systemctl is-active --quiet mxui-xray 2>/dev/null; then
@@ -825,7 +825,7 @@ show_info() {
         echo -e "  Single Port: ${CYAN}${SINGLE_PORT}${NC}"
         echo ""
     else
-        echo -e "${YELLOW}Admin info not found. MX-UI may not be properly installed.${NC}"
+        echo -e "${YELLOW}Admin info not found. MXUI may not be properly installed.${NC}"
     fi
 }
 
@@ -877,7 +877,7 @@ run_installer() {
     if [[ -f "/tmp/mxui_install.sh" ]]; then
         bash /tmp/mxui_install.sh
     else
-        curl -sL https://raw.githubusercontent.com/MATIN-X/MX-UI/main/install.sh | bash
+        curl -sL https://raw.githubusercontent.com/MATIN-X/MXUI/main/install.sh | bash
     fi
 }
 
@@ -920,10 +920,10 @@ start_service() {
     sleep 2
 
     if systemctl is-active --quiet mxui; then
-        log "MX-UI started successfully"
+        log "MXUI started successfully"
         return 0
     else
-        log_error "Failed to start MX-UI"
+        log_error "Failed to start MXUI"
         return 1
     fi
 }
@@ -1025,7 +1025,7 @@ NODEEOF
     # Create node service
     cat > /etc/systemd/system/mxui-node.service << NODESERVICEEOF
 [Unit]
-Description=MX-UI Node Service
+Description=MXUI Node Service
 After=network.target
 
 [Service]
@@ -1056,12 +1056,12 @@ NODESERVICEEOF
 # ═══════════════════════════════════════════════════════════════════════════════
 update_mxui() {
     show_banner
-    echo -e "${BOLD}Update MX-UI${NC}"
+    echo -e "${BOLD}Update MXUI${NC}"
     echo -e "${WHITE}═══════════════════════════════════════════════════════════════════${NC}"
     echo ""
 
     if [[ ! -d "$INSTALL_DIR" ]]; then
-        log_error "MX-UI is not installed"
+        log_error "MXUI is not installed"
         read -rp "Press Enter to continue..."
         return
     fi
@@ -1091,10 +1091,10 @@ update_mxui() {
 # ═══════════════════════════════════════════════════════════════════════════════
 uninstall_mxui() {
     show_banner
-    echo -e "${BOLD}Uninstall MX-UI${NC}"
+    echo -e "${BOLD}Uninstall MXUI${NC}"
     echo -e "${WHITE}═══════════════════════════════════════════════════════════════════${NC}"
     echo ""
-    echo -e "${RED}WARNING: This will remove MX-UI and all data!${NC}"
+    echo -e "${RED}WARNING: This will remove MXUI and all data!${NC}"
     echo ""
 
     read -rp "Create backup before uninstalling? [Y/n]: " backup_confirm
@@ -1122,7 +1122,7 @@ uninstall_mxui() {
     rm -rf "$NODE_DIR"
     rm -f "$CLI_PATH"
 
-    log "MX-UI uninstalled successfully"
+    log "MXUI uninstalled successfully"
     echo ""
     read -rp "Press Enter to continue..."
 }
@@ -1190,7 +1190,7 @@ show_admin_info() {
         echo -e "  Single Port: ${CYAN}${SINGLE_PORT}${NC}"
         echo ""
     else
-        echo -e "${YELLOW}MX-UI is not installed or admin info not found${NC}"
+        echo -e "${YELLOW}MXUI is not installed or admin info not found${NC}"
     fi
     read -rp "Press Enter to continue..."
 }
@@ -1266,9 +1266,9 @@ check_service_status() {
     echo ""
 
     if systemctl is-active --quiet mxui 2>/dev/null; then
-        echo -e "  MX-UI Panel:  ${GREEN}● Running${NC}"
+        echo -e "  MXUI Panel:  ${GREEN}● Running${NC}"
     else
-        echo -e "  MX-UI Panel:  ${RED}○ Stopped${NC}"
+        echo -e "  MXUI Panel:  ${RED}○ Stopped${NC}"
     fi
 
     if systemctl is-active --quiet mxui-xray 2>/dev/null; then
@@ -1278,7 +1278,7 @@ check_service_status() {
     fi
 
     if systemctl is-active --quiet mxui-node 2>/dev/null; then
-        echo -e "  MX-UI Node:   ${GREEN}● Running${NC}"
+        echo -e "  MXUI Node:   ${GREEN}● Running${NC}"
     fi
 
     echo ""

@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/monitor.go
 // System Monitoring: CPU, RAM, Disk, Network, Traffic Analytics, Alerts, Connection Logs
 

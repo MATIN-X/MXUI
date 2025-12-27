@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // screens/splash_screen.dart - Splash Screen
 
 import 'package:flutter/material.dart';
@@ -41,7 +41,7 @@ class SplashScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               const Text(
-                'MX-UI VPN',
+                'MXUI VPN',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,

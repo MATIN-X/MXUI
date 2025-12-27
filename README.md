@@ -148,7 +148,7 @@ MR-X is a powerful, feature-rich VPN management panel built with Go and modern w
 Unified installer (select Master/Node, Bash/Docker, Quick/Custom):
 
 ```bash
-bash <(curl -sL https://raw.githubusercontent.com/MATIN-X/MX-UI/main/install.sh)
+bash <(curl -sL https://raw.githubusercontent.com/MATIN-X/MXUI/main/install.sh)
 ```
 
 Notes

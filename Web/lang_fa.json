@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "پنل MX-UI VPN",
+    "name": "پنل MXUI VPN",
     "description": "پنل مدیریت VPN حرفه‌ای",
     "version": "نسخه"
   },
@@ -551,7 +551,7 @@
     "updateAvailable": "بروزرسانی موجود است"
   },
   "footer": {
-    "copyright": "© ۲۰۲۴ پنل MX-UI VPN",
+    "copyright": "© ۲۰۲۴ پنل MXUI VPN",
     "version": "نسخه {version}",
     "documentation": "مستندات",
     "support": "پشتیبانی",

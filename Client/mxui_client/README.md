@@ -1,6 +1,6 @@
-# MX-UI Client (Flutter)
+# MXUI Client (Flutter)
 
-This is the Flutter client scaffold for MX-UI.
+This is the Flutter client scaffold for MXUI.
 
 ## Platforms
 - Android

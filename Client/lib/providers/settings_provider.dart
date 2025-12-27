@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // providers/settings_provider.dart - Settings State Provider
 
 import 'dart:convert';

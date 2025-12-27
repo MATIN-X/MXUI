@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/bot.go
 // Telegram Bot: Core, Commands, Keyboards, Handlers, Payments, Notifications
 
@@ -1068,7 +1068,7 @@ func (b *TelegramBot) cmdStart(bot *TelegramBot, update *Update) error {
 	text := fmt.Sprintf(`
 ðŸ‘‹ Ø³Ù„Ø§Ù… %s!
 
-ðŸŒ Ø¨Ù‡ Ø±Ø¨Ø§Øª *MX-UI VPN* Ø®ÙˆØ´ Ø¢Ù…Ø¯ÛŒØ¯.
+ðŸŒ Ø¨Ù‡ Ø±Ø¨Ø§Øª *MXUI VPN* Ø®ÙˆØ´ Ø¢Ù…Ø¯ÛŒØ¯.
 
 ðŸ“‹ Ø¯Ø³ØªÙˆØ±Ø§Øª Ù…ÙˆØ¬ÙˆØ¯:
 /plans - Ù…Ø´Ø§Ù‡Ø¯Ù‡ Ù¾Ù„Ù†â€ŒÙ‡Ø§ Ùˆ Ø®Ø±ÛŒØ¯
@@ -1094,7 +1094,7 @@ func (b *TelegramBot) cmdHelp(bot *TelegramBot, update *Update) error {
 	chatID := msg.Chat.ID
 
 	text := `
-ðŸ“š *Ø±Ø§Ù‡Ù†Ù…Ø§ÛŒ Ø±Ø¨Ø§Øª MX-UI VPN*
+ðŸ“š *Ø±Ø§Ù‡Ù†Ù…Ø§ÛŒ Ø±Ø¨Ø§Øª MXUI VPN*
 
 ðŸ”¹ *Ø¯Ø³ØªÙˆØ±Ø§Øª Ú©Ø§Ø±Ø¨Ø±ÛŒ:*
 /start - Ø´Ø±ÙˆØ¹ Ù…Ø¬Ø¯Ø¯ Ø±Ø¨Ø§Øª

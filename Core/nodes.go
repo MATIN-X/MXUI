@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/nodes.go
 // Node Management: CRUD, Health Check, Sync, Load Balancer, Failover, Metrics
 
@@ -1971,13 +1971,13 @@ func (nm *NodeManager) GenerateNodeInstallScript(nodeID int64) (string, error) {
 	}
 
 	script := fmt.Sprintf(`#!/bin/bash
-# MX-UI VPN Panel - Node Installation Script
+# MXUI VPN Panel - Node Installation Script
 # Node ID: %d
 # Generated: %s
 
 set -e
 
-echo "=== MX-UI Node Installation ==="
+echo "=== MXUI Node Installation ==="
 
 # Install dependencies
 apt-get update
@@ -1986,7 +1986,7 @@ apt-get install -y curl wget unzip
 # Download and install Xray
 bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
 
-# Create MX-UI node agent directory
+# Create MXUI node agent directory
 mkdir -p /opt/mxui-node
 cd /opt/mxui-node
 
@@ -2005,7 +2005,7 @@ EOF
 # Create systemd service
 cat > /etc/systemd/system/mxui-node.service << 'EOF'
 [Unit]
-Description=MX-UI VPN Node Agent
+Description=MXUI VPN Node Agent
 After=network.target
 
 [Service]

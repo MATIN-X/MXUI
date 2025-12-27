@@ -1,5 +1,5 @@
 /**
- * MX-UI VPN Panel - UI Components
+ * MXUI VPN Panel - UI Components
  * components.js - Sidebar, Modals, Cards, Notifications
  */
 
@@ -24,7 +24,7 @@ class Sidebar {
             <div class="sidebar-header">
                 <div class="logo">
                     <span class="logo-icon">🔐</span>
-                    <span class="logo-text">MX-UI Panel</span>
+                    <span class="logo-text">MXUI Panel</span>
                 </div>
                 <button class="sidebar-toggle" onclick="sidebar.toggle()">
                     <span>☰</span>

@@ -167,7 +167,7 @@ class LoggerService {
       );
 
       final buffer = StringBuffer();
-      buffer.writeln('MX-UI Client Logs Export');
+      buffer.writeln('MXUI Client Logs Export');
       buffer.writeln('Generated: ${DateTime.now().toIso8601String()}');
       buffer.writeln('Total entries: ${_logs.length}');
       buffer.writeln('=' * 50);

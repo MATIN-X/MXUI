@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/protocols.go
 // Protocol Management: Xray, Sing-box, Clash, WireGuard, Hysteria2, TUIC, Shadowsocks2022
 

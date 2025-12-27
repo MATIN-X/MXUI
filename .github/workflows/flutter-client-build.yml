@@ -1,4 +1,4 @@
-name: Build MX-UI Flutter Client (All Platforms)
+name: Build MXUI Flutter Client (All Platforms)
 
 on:
   push:

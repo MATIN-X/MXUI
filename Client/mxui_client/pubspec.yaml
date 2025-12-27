@@ -1,5 +1,5 @@
 name: mxui_client
-description: MX-UI VPN Client - Multi-platform VPN management application
+description: MXUI VPN Client - Multi-platform VPN management application
 publish_to: "none"
 
 version: 1.0.0+1
@@ -62,15 +62,18 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  
+
   assets:
-    - assets/images/
-    - assets/icons/
     - assets/translations/
-  
-  fonts:
-    - family: Vazirmatn
-      fonts:
-        - asset: assets/fonts/Vazirmatn-Regular.ttf
-        - asset: assets/fonts/Vazirmatn-Bold.ttf
-          weight: 700
+    # Optional assets - uncomment when files exist
+    # - assets/images/
+    # - assets/icons/
+
+  # Fonts loaded from google_fonts package
+  # To use custom fonts, download and add:
+  # fonts:
+  #   - family: Vazirmatn
+  #     fonts:
+  #       - asset: assets/fonts/Vazirmatn-Regular.ttf
+  #       - asset: assets/fonts/Vazirmatn-Bold.ttf
+  #         weight: 700

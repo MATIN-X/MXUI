@@ -1,8 +1,8 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // core/constants.dart - Application Constants
 
 class AppConstants {
-  static const String appName = 'MX-UI VPN';
+  static const String appName = 'MXUI VPN';
   static const String appVersion = '1.0.0';
 
   // API

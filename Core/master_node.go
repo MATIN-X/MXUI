@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/master_node.go
 // Master-Node Architecture: Distributed Panel System
 

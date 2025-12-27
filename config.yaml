@@ -2,10 +2,10 @@
 #
 #          FILE: config.yaml
 #
-#   DESCRIPTION: MX-UI VPN Panel Configuration File
-#                This is the main configuration file for MX-UI Panel
+#   DESCRIPTION: MXUI VPN Panel Configuration File
+#                This is the main configuration file for MXUI Panel
 #
-#        AUTHOR: MX-UI Team
+#        AUTHOR: MXUI Team
 #       VERSION: 2.0.0
 #
 #===============================================================================
@@ -656,7 +656,7 @@ logging:
 #===============================================================================
 panel:
   # Panel title
-  title: "MX-UI VPN Panel"
+  title: "MXUI VPN Panel"
   
   # Default language (en, fa, zh, ru)
   language: "en"
@@ -697,7 +697,7 @@ subscription:
   base_url: ""
   
   # Profile title shown in apps
-  profile_title: "MX-UI"
+  profile_title: "MXUI"
   
   # Support URL
   support_url: ""

@@ -1,5 +1,5 @@
 // Core/tools.go
-// MX-UI VPN Panel - Tools & Utilities
+// MXUI VPN Panel - Tools & Utilities
 // Part 1: Network Utils, Crypto, Validators, Helpers
 
 package core
@@ -867,7 +867,7 @@ func (ct *CryptoTools) GenerateSelfSignedCert(hosts []string, validDays int) (ce
 	template := x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
-			Organization: []string{"MX-UI VPN"},
+			Organization: []string{"MXUI VPN"},
 			CommonName:   hosts[0],
 		},
 		NotBefore:             time.Now(),
@@ -1451,7 +1451,7 @@ func (ft *FileTools) TempDir(dir, pattern string) (string, error) {
 }
 
 // Core/tools.go
-// MX-UI VPN Panel - Tools & Utilities
+// MXUI VPN Panel - Tools & Utilities
 // Part 2: String Utils, Time Utils, System Utils, Updater, QR Code
 
 // ==================== String Utilities ====================

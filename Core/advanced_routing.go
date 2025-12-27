@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/advanced_routing.go
 // Advanced Routing Features: DNS over HTTPS, MUX, Fragment, Routing Rules Management
 

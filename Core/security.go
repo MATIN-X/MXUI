@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/security.go
 // Security Layer: JWT, 2FA, Auth, Brute-force Protection, Encryption, Whitelist, Decoy
 
@@ -446,7 +446,7 @@ func (sm *SecurityManager) Generate2FASecret(username string) (*TOTPSecret, erro
 	secretBase32 := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(secret)
 
 	// Build otpauth URL
-	issuer := "MX-UI Panel"
+	issuer := "MXUI Panel"
 	url := fmt.Sprintf("otpauth://totp/%s:%s?secret=%s&issuer=%s&algorithm=SHA1&digits=%d&period=%d",
 		issuer, username, secretBase32, issuer, TOTPDigits, TOTPPeriod)
 

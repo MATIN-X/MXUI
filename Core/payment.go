@@ -1,5 +1,5 @@
 // Core/payment.go
-// MX-UI VPN Panel - Payment & Financial System
+// MXUI VPN Panel - Payment & Financial System
 // Part 1: Constants, Structures, Wallet System, Currency Management
 
 package core
@@ -2083,7 +2083,7 @@ func (pm *PaymentManager) GetTransaction(transactionID string) (*Transaction, er
 }
 
 // Core/payment.go
-// MX-UI VPN Panel - Payment & Financial System
+// MXUI VPN Panel - Payment & Financial System
 // Part 2: Invoice System, Subscription Plans, Discount Codes, Commission
 
 // ==================== Invoice System ====================
@@ -3949,7 +3949,7 @@ func (pm *PaymentManager) GetTopSellingPlans(limit int, startDate, endDate time.
 }
 
 // Core/payment.go
-// MX-UI VPN Panel - Payment & Financial System
+// MXUI VPN Panel - Payment & Financial System
 // Part 3: Payment Gateways, Webhooks, API Handlers, Notifications
 
 // ==================== Gateway Handlers ====================

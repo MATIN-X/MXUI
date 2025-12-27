@@ -13,7 +13,8 @@ on:
 
 env:
   GO_VERSION: '1.22'
-  FLUTTER_VERSION: '3.22.0'
+  FLUTTER_VERSION: '3.24.5'
+  FLUTTER_DIR: 'Client/mxui_client'
 
 jobs:
   # Build Go backend binaries
@@ -49,6 +50,15 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: true
 
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "VERSION=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build MXUI Server
         env:
           GOOS: ${{ matrix.os }}
@@ -56,19 +66,9 @@ jobs:
           CGO_ENABLED: '0'
         run: |
           mkdir -p dist
-          go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
+          go build -ldflags="-s -w -X main.Version=${{ steps.version.outputs.VERSION }}" \
             -o dist/mxui-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} \
             ./cmd/mxui
-
-      - name: Build MXUI Node
-        env:
-          GOOS: ${{ matrix.os }}
-          GOARCH: ${{ matrix.arch }}
-          CGO_ENABLED: '0'
-        run: |
-          go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
-            -o dist/mxui-node-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} \
-            ./cmd/mxui-node
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -98,76 +98,47 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Create required directories
+        run: |
+          mkdir -p ${{ env.FLUTTER_DIR }}/assets/images
+          mkdir -p ${{ env.FLUTTER_DIR }}/assets/icons
+          mkdir -p ${{ env.FLUTTER_DIR }}/assets/fonts
+          mkdir -p ${{ env.FLUTTER_DIR }}/assets/translations
+          touch ${{ env.FLUTTER_DIR }}/assets/images/.gitkeep
+          touch ${{ env.FLUTTER_DIR }}/assets/icons/.gitkeep
+
       - name: Get dependencies
-        working-directory: Client/mxui_client
+        working-directory: ${{ env.FLUTTER_DIR }}
         run: flutter pub get
 
       - name: Build APK
-        working-directory: Client/mxui_client
+        working-directory: ${{ env.FLUTTER_DIR }}
         run: |
-          flutter build apk --release \
-            --build-number=${{ github.run_number }} \
-            --build-name=${{ github.ref_name }}
+          flutter build apk --release --split-per-abi
 
       - name: Build App Bundle
-        working-directory: Client/mxui_client
-        run: |
-          flutter build appbundle --release \
-            --build-number=${{ github.run_number }} \
-            --build-name=${{ github.ref_name }}
+        working-directory: ${{ env.FLUTTER_DIR }}
+        run: flutter build appbundle --release
 
-      - name: Upload APK
+      - name: Rename APKs
+        run: |
+          cd ${{ env.FLUTTER_DIR }}/build/app/outputs/flutter-apk/
+          for f in *.apk; do
+            mv "$f" "mxui-client-${f}"
+          done
+
+      - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk
-          path: Client/mxui_client/build/app/outputs/flutter-apk/app-release.apk
+          name: android-apks
+          path: ${{ env.FLUTTER_DIR }}/build/app/outputs/flutter-apk/mxui-client-*.apk
           retention-days: 1
 
-      - name: Upload App Bundle
+      - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
           name: android-aab
-          path: Client/mxui_client/build/app/outputs/bundle/release/app-release.aab
-          retention-days: 1
-
-  # Build Flutter iOS IPA
-  build-ios:
-    name: Build iOS IPA
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-
-      - name: Get dependencies
-        working-directory: Client/mxui_client
-        run: flutter pub get
-
-      - name: Build iOS (no codesign)
-        working-directory: Client/mxui_client
-        run: |
-          flutter build ios --release --no-codesign \
-            --build-number=${{ github.run_number }} \
-            --build-name=${{ github.ref_name }}
-
-      - name: Create IPA
-        working-directory: Client/mxui_client
-        run: |
-          mkdir -p Payload
-          cp -r build/ios/iphoneos/Runner.app Payload/
-          zip -r mxui-ios.ipa Payload
-
-      - name: Upload IPA
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-ipa
-          path: Client/mxui_client/mxui-ios.ipa
+          path: ${{ env.FLUTTER_DIR }}/build/app/outputs/bundle/release/app-release.aab
           retention-days: 1
 
   # Build Flutter Windows
@@ -185,60 +156,33 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Create required directories
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ env.FLUTTER_DIR }}/assets/images"
+          New-Item -ItemType Directory -Force -Path "${{ env.FLUTTER_DIR }}/assets/icons"
+          New-Item -ItemType Directory -Force -Path "${{ env.FLUTTER_DIR }}/assets/fonts"
+          New-Item -ItemType Directory -Force -Path "${{ env.FLUTTER_DIR }}/assets/translations"
+          New-Item -ItemType File -Force -Path "${{ env.FLUTTER_DIR }}/assets/images/.gitkeep"
+          New-Item -ItemType File -Force -Path "${{ env.FLUTTER_DIR }}/assets/icons/.gitkeep"
+
       - name: Get dependencies
-        working-directory: Client/mxui_client
+        working-directory: ${{ env.FLUTTER_DIR }}
         run: flutter pub get
 
       - name: Build Windows
-        working-directory: Client/mxui_client
+        working-directory: ${{ env.FLUTTER_DIR }}
         run: flutter build windows --release
 
       - name: Create archive
         run: |
-          Compress-Archive -Path Client/mxui_client/build/windows/x64/runner/Release/* -DestinationPath mxui-windows-x64.zip
+          Compress-Archive -Path "${{ env.FLUTTER_DIR }}/build/windows/x64/runner/Release/*" -DestinationPath "mxui-client-windows-x64.zip"
 
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
           name: windows-x64
-          path: mxui-windows-x64.zip
-          retention-days: 1
-
-  # Build Flutter macOS
-  build-macos:
-    name: Build macOS
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-
-      - name: Get dependencies
-        working-directory: Client/mxui_client
-        run: flutter pub get
-
-      - name: Build macOS
-        working-directory: Client/mxui_client
-        run: flutter build macos --release
-
-      - name: Create DMG
-        run: |
-          cd Client/mxui_client/build/macos/Build/Products/Release
-          mkdir -p dmg_contents
-          cp -r "mxui_client.app" dmg_contents/
-          hdiutil create -volname "MX-UI" -srcfolder dmg_contents -ov -format UDZO mxui-macos.dmg
-
-      - name: Upload macOS build
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-dmg
-          path: Client/mxui_client/build/macos/Build/Products/Release/mxui-macos.dmg
+          path: mxui-client-windows-x64.zip
           retention-days: 1
 
   # Build Flutter Linux
@@ -261,30 +205,39 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Create required directories
+        run: |
+          mkdir -p ${{ env.FLUTTER_DIR }}/assets/images
+          mkdir -p ${{ env.FLUTTER_DIR }}/assets/icons
+          mkdir -p ${{ env.FLUTTER_DIR }}/assets/fonts
+          mkdir -p ${{ env.FLUTTER_DIR }}/assets/translations
+          touch ${{ env.FLUTTER_DIR }}/assets/images/.gitkeep
+          touch ${{ env.FLUTTER_DIR }}/assets/icons/.gitkeep
+
       - name: Get dependencies
-        working-directory: Client/mxui_client
+        working-directory: ${{ env.FLUTTER_DIR }}
         run: flutter pub get
 
       - name: Build Linux
-        working-directory: Client/mxui_client
+        working-directory: ${{ env.FLUTTER_DIR }}
         run: flutter build linux --release
 
       - name: Create archive
         run: |
-          cd Client/mxui_client/build/linux/x64/release
-          tar -czvf mxui-linux-x64.tar.gz bundle/
+          cd ${{ env.FLUTTER_DIR }}/build/linux/x64/release
+          tar -czvf mxui-client-linux-x64.tar.gz bundle/
 
       - name: Upload Linux build
         uses: actions/upload-artifact@v4
         with:
           name: linux-x64
-          path: Client/mxui_client/build/linux/x64/release/mxui-linux-x64.tar.gz
+          path: ${{ env.FLUTTER_DIR }}/build/linux/x64/release/mxui-client-linux-x64.tar.gz
           retention-days: 1
 
-  # Create Release
-  create-release:
+  # Create GitHub Release
+  release:
     name: Create Release
-    needs: [build-backend, build-android, build-ios, build-windows, build-macos, build-linux]
+    needs: [build-backend, build-android, build-windows, build-linux]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -293,139 +246,99 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "VERSION=${{ inputs.version }}" >> $GITHUB_OUTPUT
+            echo "TAG=v${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+            echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - name: Organize release files
+      - name: Prepare release assets
         run: |
           mkdir -p release
-          
+
           # Backend binaries
-          find artifacts -name "mxui-*" -type f -exec mv {} release/ \;
-          
-          # Flutter builds
-          mv artifacts/android-apk/*.apk release/mxui-android.apk || true
-          mv artifacts/ios-ipa/*.ipa release/mxui-ios.ipa || true
-          mv artifacts/windows-x64/*.zip release/ || true
-          mv artifacts/macos-dmg/*.dmg release/ || true
-          mv artifacts/linux-x64/*.tar.gz release/ || true
-          
-          # Generate checksums
-          cd release
-          sha256sum * > SHA256SUMS.txt
+          for dir in artifacts/backend-*; do
+            cp $dir/* release/
+          done
 
-      - name: Generate Release Notes
-        id: release_notes
+          # Android APKs
+          cp artifacts/android-apks/*.apk release/
+          cp artifacts/android-aab/*.aab release/
+
+          # Windows
+          cp artifacts/windows-x64/*.zip release/
+
+          # Linux
+          cp artifacts/linux-x64/*.tar.gz release/
+
+          # Web panel
+          cd Web && zip -r ../release/mxui-web-panel.zip . && cd ..
+
+          # Scripts
+          cp install.sh release/
+          cp uninstall.sh release/
+
+          # List all files
+          ls -la release/
+
+      - name: Generate checksums
         run: |
-          cat << 'EOF' > release_notes.md
-          ## MX-UI ${{ github.ref_name }}
-          
-          ### Downloads
-          
-          #### Backend Server
-          | Platform | Architecture | Download |
-          |----------|--------------|----------|
-          | Linux | x64 | `mxui-linux-amd64` |
-          | Linux | arm64 | `mxui-linux-arm64` |
-          | macOS | x64 | `mxui-darwin-amd64` |
-          | macOS | Apple Silicon | `mxui-darwin-arm64` |
-          | Windows | x64 | `mxui-windows-amd64.exe` |
-          
-          #### Node Agent
-          | Platform | Architecture | Download |
-          |----------|--------------|----------|
-          | Linux | x64 | `mxui-node-linux-amd64` |
-          | Linux | arm64 | `mxui-node-linux-arm64` |
-          | macOS | x64 | `mxui-node-darwin-amd64` |
-          | macOS | Apple Silicon | `mxui-node-darwin-arm64` |
-          | Windows | x64 | `mxui-node-windows-amd64.exe` |
-          
-          #### Client Apps
-          | Platform | Download |
-          |----------|----------|
-          | Android | `mxui-android.apk` |
-          | iOS | `mxui-ios.ipa` |
-          | Windows | `mxui-windows-x64.zip` |
-          | macOS | `mxui-macos.dmg` |
-          | Linux | `mxui-linux-x64.tar.gz` |
-          
-          ### Installation
-          
-          ```bash
-          # Quick install on Linux
-          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/main/install.sh | bash
-          ```
-          
-          ### Checksums
-          Verify your download with `SHA256SUMS.txt`
-          EOF
+          cd release
+          sha256sum * > checksums.txt
+          cat checksums.txt
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: MX-UI ${{ github.ref_name }}
-          body_path: release_notes.md
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: MXUI ${{ steps.version.outputs.VERSION }}
           draft: false
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(steps.version.outputs.VERSION, 'beta') || contains(steps.version.outputs.VERSION, 'alpha') }}
+          generate_release_notes: true
           files: |
             release/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+            ## MXUI VPN Panel v${{ steps.version.outputs.VERSION }}
 
-  # Docker build
-  build-docker:
-    name: Build Docker Image
-    runs-on: ubuntu-latest
-    needs: [build-backend]
-    permissions:
-      contents: read
-      packages: write
+            ### Downloads
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+            #### Server (Backend)
+            | Platform | Architecture | Download |
+            |----------|--------------|----------|
+            | Linux | amd64 | `mxui-linux-amd64` |
+            | Linux | arm64 | `mxui-linux-arm64` |
+            | macOS | amd64 | `mxui-darwin-amd64` |
+            | macOS | arm64 | `mxui-darwin-arm64` |
+            | Windows | amd64 | `mxui-windows-amd64.exe` |
 
-      - name: Download backend artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: backend-linux-*
-          path: artifacts
+            #### Client Apps
+            | Platform | Download |
+            |----------|----------|
+            | Android | `mxui-client-*.apk` |
+            | Windows | `mxui-client-windows-x64.zip` |
+            | Linux | `mxui-client-linux-x64.tar.gz` |
 
-      - name: Prepare binaries
-        run: |
-          mkdir -p bin
-          find artifacts -name "mxui-linux-amd64" -exec cp {} bin/mxui \;
-          chmod +x bin/mxui
+            #### Web Panel
+            | Package | Download |
+            |---------|----------|
+            | Web Panel | `mxui-web-panel.zip` |
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+            ### Installation
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+            ```bash
+            # Quick install
+            bash <(curl -Ls https://raw.githubusercontent.com/MXUI-Panel/MXUI/main/install.sh)
+            ```
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ### Checksums
+            See `checksums.txt` for SHA256 checksums of all files.

@@ -1,4 +1,4 @@
-// cloudflare.go - MX-UI Cloudflare Integration (Part 1)
+// cloudflare.go - MXUI Cloudflare Integration (Part 1)
 // Cloudflare API, DNS, CDN, Workers, WARP, Zero Trust
 
 package core
@@ -2181,7 +2181,7 @@ func (cf *CloudflareManager) ResolveIP(domain string) ([]string, error) {
 	return result, nil
 }
 
-// cloudflare.go - MX-UI Cloudflare Integration (Part 2)
+// cloudflare.go - MXUI Cloudflare Integration (Part 2)
 // WARP Manager, Workers Manager, CDN Manager
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -2280,7 +2280,7 @@ func (wm *WARPManager) Register() (*WARPRegistrationResponse, error) {
 		InstallID: installID,
 		FCMToken:  "",
 		Tos:       time.Now().Format(time.RFC3339),
-		Model:     "MX-UI VPN Panel",
+		Model:     "MXUI VPN Panel",
 		Type:      "Linux",
 		Locale:    "en_US",
 	}
@@ -3119,7 +3119,7 @@ func (wm *WorkersManager) BulkDeleteKV(namespaceID string, keys []string) error 
 // VPNProxyWorkerScript returns a VPN proxy worker script
 func (wm *WorkersManager) VPNProxyWorkerScript(backendURL string) string {
 	return fmt.Sprintf(`
-// MX-UI VPN Proxy Worker
+// MXUI VPN Proxy Worker
 // Routes traffic through Cloudflare CDN
 
 const BACKEND = '%s';
@@ -3151,7 +3151,7 @@ async function handleRequest(request) {
         const response = await fetch(backendURL, init);
         
         const responseHeaders = new Headers(response.headers);
-        responseHeaders.set('X-Served-By', 'MX-UI CDN');
+        responseHeaders.set('X-Served-By', 'MXUI CDN');
         
         return new Response(response.body, {
             status: response.status,
@@ -3168,7 +3168,7 @@ async function handleRequest(request) {
 // WebSocketProxyWorkerScript returns a WebSocket proxy worker script
 func (wm *WorkersManager) WebSocketProxyWorkerScript(backendWS string) string {
 	return fmt.Sprintf(`
-// MX-UI WebSocket Proxy Worker
+// MXUI WebSocket Proxy Worker
 
 const BACKEND_WS = '%s';
 
@@ -3208,7 +3208,7 @@ async function handleWebSocket(request) {
 // GRPCProxyWorkerScript returns a gRPC proxy worker script
 func (wm *WorkersManager) GRPCProxyWorkerScript(backendGRPC string) string {
 	return fmt.Sprintf(`
-// MX-UI gRPC Proxy Worker
+// MXUI gRPC Proxy Worker
 
 const BACKEND_GRPC = '%s';
 
@@ -3247,7 +3247,7 @@ async function handleGRPC(request) {
 // SubscriptionWorkerScript returns a subscription page worker script
 func (wm *WorkersManager) SubscriptionWorkerScript(apiURL string) string {
 	return fmt.Sprintf(`
-// MX-UI Subscription Worker
+// MXUI Subscription Worker
 
 const API_URL = '%s';
 
@@ -3277,7 +3277,7 @@ async function handleRequest(request) {
         return getSingboxConfig(token, request);
     }
     
-    return new Response('MX-UI VPN Subscription', { 
+    return new Response('MXUI VPN Subscription', { 
         status: 200,
         headers: { 'Content-Type': 'text/plain' }
     });
@@ -3292,7 +3292,7 @@ async function getSubscription(token, request) {
             'Content-Type': 'text/plain',
             'Subscription-Userinfo': response.headers.get('Subscription-Userinfo') || '',
             'Profile-Update-Interval': '12',
-            'Profile-Title': 'MX-UI VPN'
+            'Profile-Title': 'MXUI VPN'
         }
     });
 }
@@ -3846,7 +3846,7 @@ func (m *multipartWriter) Close() error {
 	return nil
 }
 
-// cloudflare.go - MX-UI Cloudflare Integration (Part 3)
+// cloudflare.go - MXUI Cloudflare Integration (Part 3)
 // Tunnels, Spectrum, Load Balancer, Health Checks
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -4087,7 +4087,7 @@ func (tm *TunnelManager) CreateTunnelDNS(zoneID, tunnelID, subdomain string) (*D
 		Content: fmt.Sprintf("%s.cfargotunnel.com", tunnelID),
 		Proxied: true,
 		TTL:     1,
-		Comment: "MX-UI Tunnel",
+		Comment: "MXUI Tunnel",
 	}
 
 	return cf.CreateDNSRecord(zoneID, record)
@@ -4129,7 +4129,7 @@ func (tm *TunnelManager) GenerateCloudflaredCredentials(tunnel *Tunnel) string {
 // GenerateCloudflaredInstallScript generates installation script
 func (tm *TunnelManager) GenerateCloudflaredInstallScript(tunnel *Tunnel, token string) string {
 	script := fmt.Sprintf(`#!/bin/bash
-# MX-UI Cloudflare Tunnel Installation Script
+# MXUI Cloudflare Tunnel Installation Script
 
 set -e
 
@@ -5350,7 +5350,7 @@ func (cf *CloudflareManager) SyncDNSWithNodes(nodes []*CFNodeInfo, subdomain str
 				Content: node.IP,
 				TTL:     1,
 				Proxied: true,
-				Comment: fmt.Sprintf("MX-UI Node: %s", node.Name),
+				Comment: fmt.Sprintf("MXUI Node: %s", node.Name),
 			}
 
 			_, err := cf.CreateDNSRecord(cf.Config.DefaultZoneID, record)
@@ -5408,7 +5408,7 @@ func (cf *CloudflareManager) StartDNSAutoSync(getNodes func() []*CFNodeInfo, sub
 	LogInfo("CLOUDFLARE", "DNS auto-sync started (interval: %v)", interval)
 }
 
-// cloudflare.go - MX-UI Cloudflare Integration (Part 4)
+// cloudflare.go - MXUI Cloudflare Integration (Part 4)
 // API Routes, Utilities, Integration Helpers, Configuration Templates
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -7077,7 +7077,7 @@ func (cf *CloudflareManager) mergeConfig(newConfig *CloudflareConfig) {
 // INTEGRATION HELPERS
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-// IntegrationConfig for integrating Cloudflare with other MX-UI components
+// IntegrationConfig for integrating Cloudflare with other MXUI components
 type IntegrationConfig struct {
 	AutoDNSSync         bool          `json:"auto_dns_sync"`
 	DNSSyncInterval     time.Duration `json:"dns_sync_interval"`
@@ -7195,7 +7195,7 @@ func (cf *CloudflareManager) GetSubscriptionCDNInfo() map[string]interface{} {
 
 // GenerateNginxCDNConfig generates Nginx config for CDN
 func (cf *CloudflareManager) GenerateNginxCDNConfig(domain string, backendPort int) string {
-	return fmt.Sprintf(`# MX-UI Nginx CDN Configuration for %s
+	return fmt.Sprintf(`# MXUI Nginx CDN Configuration for %s
 # Optimized for Cloudflare
 
 server {

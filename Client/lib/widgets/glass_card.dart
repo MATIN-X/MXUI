@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // widgets/glass_card.dart - Glass Morphism Card Widget
 
 import 'dart:ui';

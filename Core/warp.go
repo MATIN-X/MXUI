@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/warp.go
 // Cloudflare WARP Integration: Configuration, Management, Routing
 
@@ -247,7 +247,7 @@ func (wm *WarpManager) RegisterDevice() (*WarpDevice, error) {
 
 	device := &WarpDevice{
 		DeviceID:  result.ID,
-		Name:      "MX-UI Panel",
+		Name:      "MXUI Panel",
 		Type:      result.Type,
 		PublicKey: publicKey,
 		CreatedAt: time.Now(),

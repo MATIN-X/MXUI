@@ -1,5 +1,5 @@
 /**
- * MX-UI VPN Panel - WebSocket
+ * MXUI VPN Panel - WebSocket
  * websocket.js - Real-time Updates, Events
  */
 

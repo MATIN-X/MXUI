@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/api.go
 // REST API: Server, Routes, Handlers, Middleware, Response, Webhooks
 
@@ -2687,7 +2687,7 @@ func (api *APIServer) generateClashConfig(user *User) string {
 port: 7890
 socks-port: 7891
 proxies:
-  - name: "MX-UI"
+  - name: "MXUI"
     type: vmess
     server: example.com
     port: 443

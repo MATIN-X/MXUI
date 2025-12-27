@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/database.go
 // Database Layer: SQLite + Encryption + Models + Migrations
 

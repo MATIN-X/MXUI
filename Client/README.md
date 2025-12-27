@@ -1,6 +1,6 @@
-# MX-UI Client (Flutter Multi-Platform)
+# MXUI Client (Flutter Multi-Platform)
 
-This folder is the scaffold for the MX-UI native client app.
+This folder is the scaffold for the MXUI native client app.
 
 ## Targets
 - Android

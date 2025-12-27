@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/admins.go
 // Admin Management: CRUD, Owner, Reseller, Permissions, Audit, Switch Admin
 

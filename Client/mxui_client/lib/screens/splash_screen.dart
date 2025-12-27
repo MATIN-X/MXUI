@@ -97,7 +97,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       const SizedBox(height: 24),
                       const Text(
-                        'MX-UI',
+                        'MXUI',
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,

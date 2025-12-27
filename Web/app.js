@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * MX-UI VPN Panel - Main Application
+ * MXUI VPN Panel - Main Application
  * app.js - Router, State Management, Authentication, App Initialization
  * ============================================================================
  */
@@ -222,7 +222,7 @@ class Router {
         }
         
         // Update title
-        document.title = `${route.title || 'MX-UI'} | MX-UI VPN Panel`;
+        document.title = `${route.title || 'MXUI'} | MXUI VPN Panel`;
         
         // Render component
         if (route.component) {
@@ -1027,8 +1027,8 @@ async function renderLoginPage() {
         <div class="login-page">
             <div class="login-container">
                 <div class="login-logo">
-                    <img src="/assets/logo.svg" alt="MX-UI" />
-                    <h1>MX-UI VPN Panel</h1>
+                    <img src="/assets/logo.svg" alt="MXUI" />
+                    <h1>MXUI VPN Panel</h1>
                 </div>
                 <form id="login-form" class="login-form" onsubmit="handleLogin(event)">
                     <div class="form-group">
@@ -1051,7 +1051,7 @@ async function renderLoginPage() {
                     </button>
                 </form>
                 <div class="login-footer">
-                    <a href="https://github.com/MX-UI-Panel" target="_blank">GitHub</a>
+                    <a href="https://github.com/MXUI-Panel" target="_blank">GitHub</a>
                     <span>|</span>
                     <span>v${MXUI.VERSION}</span>
                 </div>
@@ -1486,7 +1486,7 @@ function formatUptime(seconds) {
 // ============================================================================
 
 async function initApp() {
-    console.log('ðŸš€ Initializing MX-UI VPN Panel...');
+    console.log('ðŸš€ Initializing MXUI VPN Panel...');
     
     // Initialize theme
     themeManager.init();
@@ -1525,7 +1525,7 @@ async function initApp() {
         }
     });
     
-    console.log('âœ… MX-UI VPN Panel initialized');
+    console.log('âœ… MXUI VPN Panel initialized');
 }
 
 // Start app when DOM ready

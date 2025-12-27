@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // providers/vpn_provider.dart - VPN Connection State Provider
 
 import 'dart:async';

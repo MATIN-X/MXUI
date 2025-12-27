@@ -1,4 +1,4 @@
-// backup.go - MX-UI Backup System
+// backup.go - MXUI Backup System
 // Telegram, Google Drive, S3, Scheduler, Split Large Files
 
 package core
@@ -1230,7 +1230,7 @@ func (bm *BackupManager) uploadSingleToTelegram(filePath string, info *BackupInf
 
 	// Create caption
 	caption := fmt.Sprintf(
-		"ðŸ”„ MX-UI Backup\n\n"+
+		"ðŸ”„ MXUI Backup\n\n"+
 			"ðŸ“¦ Type: %s\n"+
 			"ðŸ“… Date: %s\n"+
 			"ðŸ“Š Size: %s\n"+
@@ -1302,7 +1302,7 @@ func (bm *BackupManager) uploadSplitToTelegram(filePath string, info *BackupInfo
 
 	// Send info message first
 	infoMsg := fmt.Sprintf(
-		"ðŸ“¦ MX-UI Backup (Split)\n\n"+
+		"ðŸ“¦ MXUI Backup (Split)\n\n"+
 			"ðŸ“‹ Type: %s\n"+
 			"ðŸ“… Date: %s\n"+
 			"ðŸ“Š Total Size: %s\n"+

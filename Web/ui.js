@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * MX-UI VPN Panel - UI Components
+ * MXUI VPN Panel - UI Components
  * ui.js - Modals, Tables, Forms, Charts, Notifications, Drag & Drop
  * ============================================================================
  */

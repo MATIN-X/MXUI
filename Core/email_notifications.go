@@ -1,5 +1,5 @@
 // Core/notifications.go
-// MX-UI VPN Panel - Notification System
+// MXUI VPN Panel - Notification System
 // Email, SMS, Push Notifications for users and admins
 
 package core
@@ -585,7 +585,7 @@ func (enm *EmailNotificationManager) GetStats() NotificationStats {
 func (enm *EmailNotificationManager) loadDefaultTemplates() {
 	templates := map[string]string{
 		"welcome": `
-			<h2>Welcome to MX-UI VPN Panel!</h2>
+			<h2>Welcome to MXUI VPN Panel!</h2>
 			<p>Hello {{.Username}},</p>
 			<p>Your account has been successfully created.</p>
 			<p>Account Details:</p>

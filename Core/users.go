@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/users.go
 // User Management: CRUD, Subscription, Traffic, Device Limit, Online Users, Trial, OnHold
 

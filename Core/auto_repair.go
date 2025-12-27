@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/auto_repair.go
 // Auto-Repair & Self-Healing System
 

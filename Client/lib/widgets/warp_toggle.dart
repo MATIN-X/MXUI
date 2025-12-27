@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // widgets/warp_toggle.dart - WARP Proxy Toggle (Hiddify Style)
 
 import 'package:flutter/material.dart';

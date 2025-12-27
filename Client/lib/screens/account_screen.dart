@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // screens/account_screen.dart - Account Management Screen
 
 import 'package:flutter/material.dart';

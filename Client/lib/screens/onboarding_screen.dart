@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // screens/onboarding_screen.dart - Onboarding/Subscription Entry Screen
 
 import 'package:flutter/material.dart';
@@ -240,7 +240,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                 // Footer
                 Text(
-                  'MX-UI VPN v${AppConstants.appVersion}',
+                  'MXUI VPN v${AppConstants.appVersion}',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.4),
                     fontSize: 12,

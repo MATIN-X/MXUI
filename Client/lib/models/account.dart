@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // models/account.dart - Account Model
 
 class Account {

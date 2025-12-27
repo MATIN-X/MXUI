@@ -1,5 +1,5 @@
 // Core/transport.go
-// MX-UI VPN Panel - Transport Layer
+// MXUI VPN Panel - Transport Layer
 // Part 1: TLS, Reality, WebSocket, Base Transport
 
 package core
@@ -1489,7 +1489,7 @@ func (wscc *WebSocketClientConn) Write(b []byte) (int, error) {
 }
 
 // Core/transport.go
-// MX-UI VPN Panel - Transport Layer
+// MXUI VPN Panel - Transport Layer
 // Part 2: gRPC, HTTP/2, QUIC, HTTPUpgrade, SplitHTTP, Fragment, Mux
 
 // ==================== gRPC Transport ====================
@@ -3274,7 +3274,7 @@ func (shcc *SplitHTTPClientConn) SetReadDeadline(t time.Time) error  { return ni
 func (shcc *SplitHTTPClientConn) SetWriteDeadline(t time.Time) error { return nil }
 
 // Core/transport.go
-// MX-UI VPN Panel - Transport Layer
+// MXUI VPN Panel - Transport Layer
 // Part 3: TCP, Fragment, Mux, Obfuscation, Transport Factory & Manager
 
 // ==================== TCP Configuration ====================

@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // services/api_service.dart - API Service
 
 import 'dart:convert';
@@ -12,7 +12,7 @@ class ApiService {
       connectTimeout: AppConstants.connectionTimeout,
       receiveTimeout: AppConstants.receiveTimeout,
       headers: {
-        'User-Agent': 'MX-UI-Client/1.0',
+        'User-Agent': 'MXUI-Client/1.0',
       },
     ),
   );

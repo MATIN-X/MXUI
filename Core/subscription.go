@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/subscription.go
 // Advanced Subscription Management: URL Generation, Multi-client Support, Auto-update
 

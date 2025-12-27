@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/geofile.go
 // GeoIP/GeoSite Management
 

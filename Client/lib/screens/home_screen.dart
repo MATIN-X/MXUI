@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // screens/home_screen.dart - Home Screen with Connect Button
 
 import 'package:flutter/material.dart';

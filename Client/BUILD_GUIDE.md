@@ -1,4 +1,4 @@
-# MX-UI Client Build & Distribution Guide
+# MXUI Client Build & Distribution Guide
 
 ## Platform Build Instructions
 
@@ -80,14 +80,14 @@ brew install create-dmg
 
 # Create DMG
 create-dmg \
-  --volname "MX-UI" \
+  --volname "MXUI" \
   --window-pos 200 120 \
   --window-size 600 400 \
   --icon-size 100 \
   --icon "mxui_client.app" 175 120 \
   --hide-extension "mxui_client.app" \
   --app-drop-link 425 120 \
-  "MX-UI-macOS.dmg" \
+  "MXUI-macOS.dmg" \
   "build/macos/Build/Products/Release/"
 ```
 
@@ -116,12 +116,12 @@ winget install JRSoftware.InnoSetup
 # Create installer script
 cat > windows/installer.iss << 'EOF'
 [Setup]
-AppName=MX-UI
+AppName=MXUI
 AppVersion=1.0.0
-DefaultDirName={pf}\MX-UI
-DefaultGroupName=MX-UI
+DefaultDirName={pf}\MXUI
+DefaultGroupName=MXUI
 OutputDir=.
-OutputBaseFilename=MX-UI-Setup
+OutputBaseFilename=MXUI-Setup
 Compression=lzma2
 SolidCompression=yes
 
@@ -129,8 +129,8 @@ SolidCompression=yes
 Source: "build\windows\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]
-Name: "{group}\MX-UI"; Filename: "{app}\mxui_client.exe"
-Name: "{autodesktop}\MX-UI"; Filename: "{app}\mxui_client.exe"
+Name: "{group}\MXUI"; Filename: "{app}\mxui_client.exe"
+Name: "{autodesktop}\MXUI"; Filename: "{app}\mxui_client.exe"
 EOF
 
 # Compile
@@ -188,9 +188,9 @@ Version: 1.0.0
 Section: net
 Priority: optional
 Architecture: amd64
-Maintainer: MX-UI <support@mxui.io>
-Description: MX-UI VPN Client
- Multi-platform VPN client for MX-UI panel
+Maintainer: MXUI <support@mxui.io>
+Description: MXUI VPN Client
+ Multi-platform VPN client for MXUI panel
 EOF
 
 # Build DEB
@@ -334,7 +334,7 @@ jobs:
 ## Download Links Structure
 
 ```
-https://github.com/your-org/MX-UI/releases/latest/download/
+https://github.com/your-org/MXUI/releases/latest/download/
 ├── mxui-android.apk
 ├── mxui-ios.ipa
 ├── mxui-macos.dmg

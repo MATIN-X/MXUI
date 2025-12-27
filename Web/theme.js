@@ -1,5 +1,5 @@
 /**
- * MX-UI VPN Panel - Theme
+ * MXUI VPN Panel - Theme
  * theme.js - Dark/Light Mode, Theme Customization
  */
 

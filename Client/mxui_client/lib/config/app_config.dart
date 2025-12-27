@@ -1,5 +1,5 @@
 class AppConfig {
-  static const String appName = 'MX-UI';
+  static const String appName = 'MXUI';
   static const String appVersion = '1.0.0';
   static const String apiBaseUrl = 'https://api.mxui.io'; // Default, user can change
   

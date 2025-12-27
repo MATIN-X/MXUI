@@ -1,4 +1,4 @@
-# MX-UI Native Client App (Flutter)
+# MXUI Native Client App (Flutter)
 # iOS 26-Style Glass Morphism Design
 
 ## Project Structure
@@ -255,7 +255,7 @@ class VpnService : VpnService() {
         builder.addAddress("10.0.0.2", 24)
         builder.addRoute("0.0.0.0", 0)
         builder.addDnsServer("1.1.1.1")
-        builder.setSession("MX-UI VPN")
+        builder.setSession("MXUI VPN")
         
         val vpnInterface = builder.establish()
         // Configure VPN...
@@ -373,4 +373,4 @@ dependencies:
 
 - **Google Play**: Coming Soon
 - **App Store**: Coming Soon
-- **APK Direct**: https://github.com/MATIN-X/MX-UI/releases
+- **APK Direct**: https://github.com/MATIN-X/MXUI/releases

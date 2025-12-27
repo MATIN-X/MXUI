@@ -1,4 +1,4 @@
-# 🚀 Production-Ready Roadmap - MX-UI VPN Panel
+# 🚀 Production-Ready Roadmap - MXUI VPN Panel
 
 ## وضعیت فعلی (Current Status)
 
@@ -305,7 +305,7 @@ require (
 
 ## نتیجه‌گیری
 
-پروژه MX-UI **پتانسیل بالایی** دارد ولی برای production نیاز به:
+پروژه MXUI **پتانسیل بالایی** دارد ولی برای production نیاز به:
 
 1. **2 هفته** برای BLOCKER fixes
 2. **2 هفته** برای CRITICAL features

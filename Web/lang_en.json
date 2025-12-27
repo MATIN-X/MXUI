@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "MX-UI VPN Panel",
+    "name": "MXUI VPN Panel",
     "description": "Professional VPN Management Panel",
     "version": "Version"
   },
@@ -552,7 +552,7 @@
     "updateAvailable": "Update available"
   },
   "footer": {
-    "copyright": "Â© 2024 MX-UI VPN Panel",
+    "copyright": "Â© 2024 MXUI VPN Panel",
     "version": "Version {version}",
     "documentation": "Documentation",
     "support": "Support",

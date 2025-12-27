@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // screens/main_screen.dart - Main Screen with Glass Tab Navigation
 
 import 'dart:ui';

@@ -79,7 +79,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   
                   // Title
                   const Text(
-                    'MX-UI',
+                    'MXUI',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,

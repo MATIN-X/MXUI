@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/routing.go
 // Routing Management: Rules, DNS, WARP, GeoFiles, Blocking, Direct Routes
 

@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/traffic_monitor.go
 // Abnormal Traffic Detection & Monitoring
 

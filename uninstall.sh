@@ -4,9 +4,9 @@
 #
 #          FILE: uninstall.sh
 #
-#   DESCRIPTION: MX-UI VPN Panel Uninstallation Script
+#   DESCRIPTION: MXUI VPN Panel Uninstallation Script
 #
-#        AUTHOR: MX-UI Team
+#        AUTHOR: MXUI Team
 #       VERSION: 1.0.0
 #
 #===============================================================================
@@ -74,7 +74,7 @@ check_root() {
 
 check_installation() {
     if [ ! -d "$MXUI_DIR" ] && [ ! -f "$MXUI_SERVICE_FILE" ]; then
-        log_error "MX-UI is not installed on this system"
+        log_error "MXUI is not installed on this system"
         exit 1
     fi
 }
@@ -90,7 +90,7 @@ backup_data() {
 }
 
 stop_service() {
-    log "Stopping MX-UI service..."
+    log "Stopping MXUI service..."
     
     # Stop systemd service
     if systemctl is-active --quiet mxui 2>/dev/null; then
@@ -135,7 +135,7 @@ stop_docker() {
 }
 
 remove_files() {
-    log "Removing MX-UI files..."
+    log "Removing MXUI files..."
     
     # Remove service file
     if [ -f "$MXUI_SERVICE_FILE" ]; then
@@ -171,12 +171,12 @@ remove_files() {
 
 remove_directory() {
     if [ -d "$MXUI_DIR" ]; then
-        read -p "  Remove all MX-UI files including data? [y/N]: " confirm
+        read -p "  Remove all MXUI files including data? [y/N]: " confirm
         if [[ "$confirm" =~ ^[Yy]$ ]]; then
             rm -rf "$MXUI_DIR"
-            log "MX-UI directory removed"
+            log "MXUI directory removed"
         else
-            log_warn "MX-UI directory kept at $MXUI_DIR"
+            log_warn "MXUI directory kept at $MXUI_DIR"
         fi
     fi
 }
@@ -208,7 +208,7 @@ main() {
     check_root
     check_installation
     
-    echo -e "${RED}  ⚠️  WARNING: This will uninstall MX-UI VPN Panel${NC}"
+    echo -e "${RED}  ⚠️  WARNING: This will uninstall MXUI VPN Panel${NC}"
     echo ""
     read -p "  Are you sure you want to continue? [y/N]: " confirm
     
@@ -235,7 +235,7 @@ main() {
     
     echo ""
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${GREEN}  ✓ MX-UI VPN Panel has been uninstalled successfully!${NC}"
+    echo -e "${GREEN}  ✓ MXUI VPN Panel has been uninstalled successfully!${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     
@@ -245,8 +245,8 @@ main() {
         echo ""
     fi
     
-    echo -e "${CYAN}  Thank you for using MX-UI!${NC}"
-    echo -e "${CYAN}  GitHub: https://github.com/MX-UI-Panel/MX-UI${NC}"
+    echo -e "${CYAN}  Thank you for using MXUI!${NC}"
+    echo -e "${CYAN}  GitHub: https://github.com/MXUI-Panel/MXUI${NC}"
     echo ""
 }
 
@@ -263,10 +263,10 @@ case "$1" in
         remove_files
         cleanup_firewall
         rm -rf "$MXUI_DIR"
-        log "MX-UI uninstalled successfully"
+        log "MXUI uninstalled successfully"
         ;;
     -h|--help)
-        echo "MX-UI Uninstallation Script"
+        echo "MXUI Uninstallation Script"
         echo ""
         echo "Usage: $0 [OPTIONS]"
         echo ""

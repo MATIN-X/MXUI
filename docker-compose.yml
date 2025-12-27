@@ -2,9 +2,9 @@
 #
 #          FILE: docker-compose.yml
 #
-#   DESCRIPTION: MX-UI VPN Panel Docker Compose Configuration
+#   DESCRIPTION: MXUI VPN Panel Docker Compose Configuration
 #
-#        AUTHOR: MX-UI Team
+#        AUTHOR: MXUI Team
 #       VERSION: 1.0.0
 #
 #   USAGE:
@@ -19,7 +19,7 @@ version: '3.8'
 
 services:
   #=============================================================================
-  # MX-UI Panel Service
+  # MXUI Panel Service
   #=============================================================================
   mxui:
     image: ghcr.io/matin-x/mxui:latest
@@ -150,7 +150,7 @@ services:
     
     # Labels
     labels:
-      - "com.mxui.description=MX-UI VPN Panel"
+      - "com.mxui.description=MXUI VPN Panel"
       - "com.mxui.version=1.0.0"
 
   #=============================================================================

@@ -1,8 +1,8 @@
 {
-  "name": "MX-UI VPN Panel",
-  "short_name": "MX-UI Panel",
+  "name": "MXUI VPN Panel",
+  "short_name": "MXUI Panel",
   "description": "پنل مدیریت حرفه‌ای VPN با پشتیبانی از تمام پروتکل‌های مدرن",
-  "start_url": "/dashboard.html",
+  "start_url": "/panel.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#6366f1",

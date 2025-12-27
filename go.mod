@@ -1,4 +1,4 @@
-module github.com/MATIN-X/MX-UI
+module github.com/MATIN-X/MXUI
 
 go 1.22.0
 

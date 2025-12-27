@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/single_port.go
 // Single Port Mode - All Protocols on Port 443
 
@@ -571,7 +571,7 @@ func generateSelfSignedCert() (tls.Certificate, error) {
 	template := x509.Certificate{
 		SerialNumber: big.NewInt(1),
 		Subject: pkix.Name{
-			Organization: []string{"MX-UI"},
+			Organization: []string{"MXUI"},
 			CommonName:   "mxui.local",
 		},
 		NotBefore:             time.Now(),

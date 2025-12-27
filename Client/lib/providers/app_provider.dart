@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // providers/app_provider.dart - Application State Provider
 
 import 'package:flutter/material.dart';

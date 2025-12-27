@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/main.go
 // Main Entry Point: Server, Config Loading, Service Lifecycle, Routes
 
@@ -36,7 +36,7 @@ const (
 	BuildTime    = "2024-12-18"
 	PanelVersion = "2.0.0"
 	APIVersion   = "v1"
-	CoreName     = "MX-UI"
+	CoreName     = "MXUI"
 )
 
 // Installation mode
@@ -318,7 +318,7 @@ func (l *Logger) Close() {
 // MAIN ENTRY POINT
 // ============================================================================
 
-// Run starts the MX-UI Panel
+// Run starts the MXUI Panel
 func Run() {
 	startTime = time.Now()
 	shutdownCh = make(chan struct{})
@@ -340,7 +340,7 @@ func Run() {
 		log.Printf("⚠️  Logger init warning: %v", err)
 	}
 
-	log.Printf("🚀 Starting MX-UI Panel v%s (Built: %s)", Version, BuildTime)
+	log.Printf("🚀 Starting MXUI Panel v%s (Built: %s)", Version, BuildTime)
 
 	if NodeMode {
 		log.Println("📡 Running in NODE mode")
@@ -461,7 +461,7 @@ func getDefaultConfig() *Config {
 			DecoyType:      "nginx",
 			Language:       "fa",
 			Theme:          "dark",
-			Title:          "MX-UI Panel",
+			Title:          "MXUI Panel",
 			SubPath:        "sub",
 			SessionTimeout: 1440,
 		},

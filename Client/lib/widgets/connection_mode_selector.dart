@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // widgets/connection_mode_selector.dart - Connection Mode Selector
 
 import 'package:flutter/material.dart';

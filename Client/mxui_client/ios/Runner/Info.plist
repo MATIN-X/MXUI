@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>MX-UI</string>
+	<string>MXUI</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -70,6 +70,6 @@
 	
 	<!-- Privacy Descriptions -->
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>MX-UI needs local network access to establish VPN connections.</string>
+	<string>MXUI needs local network access to establish VPN connections.</string>
 </dict>
 </plist>

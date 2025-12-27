@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // screens/settings_screen.dart - Settings Screen (Hiddify/V2rayNG Style)
 
 import 'package:flutter/material.dart';

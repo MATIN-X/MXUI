@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * MX-UI VPN Panel - API Client
+ * MXUI VPN Panel - API Client
  * Part 1: HTTP Client, Request/Response Handling, Interceptors, Auth
  * ============================================================================
  */
@@ -1225,7 +1225,7 @@ Object.assign(window, {
 });
 /**
  * ============================================================================
- * MX-UI VPN Panel - API Client
+ * MXUI VPN Panel - API Client
  * Part 2: Users, Admins, Nodes, Core, Inbounds, Settings APIs
  * ============================================================================
  */

@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // main.dart - Application Entry Point
 
 import 'package:flutter/material.dart';

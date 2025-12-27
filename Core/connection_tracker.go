@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/connection_tracker.go
 // Real-time Connection Tracking and Session Management
 

@@ -42,7 +42,7 @@ void main() async {
 Future<void> _initializeServices() async {
   // Initialize logger first
   await logger.initialize();
-  logger.info('App', 'Starting MX-UI Client v${AppConfig.appVersion}');
+  logger.info('App', 'Starting MXUI Client v${AppConfig.appVersion}');
 
   // Initialize Hive for local storage
   await Hive.initFlutter();

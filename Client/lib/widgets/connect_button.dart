@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // widgets/connect_button.dart - Large Connect Button Widget
 
 import 'dart:math' as math;

@@ -1,5 +1,5 @@
 /**
- * MX-UI VPN Panel - Charts
+ * MXUI VPN Panel - Charts
  * charts.js - Live Charts using Canvas
  */
 

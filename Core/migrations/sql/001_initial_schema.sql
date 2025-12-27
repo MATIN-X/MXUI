@@ -1,5 +1,5 @@
 -- +migrate Up
--- Initial database schema for MX-UI VPN Panel
+-- Initial database schema for MXUI VPN Panel
 -- Version: 1.0.0
 
 -- Admins table

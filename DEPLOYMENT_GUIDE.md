@@ -1,4 +1,4 @@
-# 🚀 MX-UI VPN Panel - Deployment Guide
+# 🚀 MXUI VPN Panel - Deployment Guide
 
 **Version:** 2.0.0 Production-Ready
 **Date:** 2024-12-25
@@ -64,11 +64,11 @@
 
 ```bash
 # Download and run installer
-bash <(curl -Ls https://raw.githubusercontent.com/YOUR-REPO/MX-UI/main/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/YOUR-REPO/MXUI/main/install.sh)
 
 # Or clone and install
-git clone https://github.com/YOUR-REPO/MX-UI.git
-cd MX-UI
+git clone https://github.com/YOUR-REPO/MXUI.git
+cd MXUI
 chmod +x install.sh
 ./install.sh
 ```
@@ -85,8 +85,8 @@ The installer will:
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/YOUR-REPO/MX-UI.git
-cd MX-UI
+git clone https://github.com/YOUR-REPO/MXUI.git
+cd MXUI
 
 # 2. Install Go dependencies
 go mod download
@@ -213,7 +213,7 @@ notifications:
     smtp_username: "your-email@gmail.com"
     smtp_password: "your-app-password"
     from_email: "noreply@yourdomain.com"
-    from_name: "MX-UI VPN Panel"
+    from_name: "MXUI VPN Panel"
     tls: true
 
 # Backup
@@ -396,7 +396,7 @@ sudo nano /etc/systemd/system/mxui.service
 
 ```ini
 [Unit]
-Description=MX-UI VPN Panel
+Description=MXUI VPN Panel
 After=network.target postgresql.service
 Wants=postgresql.service
 
@@ -706,7 +706,7 @@ sudo chmod 600 /opt/mxui/config.yaml
 #### 4. Nginx 502 Bad Gateway
 
 ```bash
-# Check if MX-UI is running
+# Check if MXUI is running
 sudo systemctl status mxui
 
 # Check Nginx error logs
@@ -834,7 +834,7 @@ After successful deployment:
 
 ---
 
-**🎉 Congratulations! Your MX-UI VPN Panel is now production-ready!**
+**🎉 Congratulations! Your MXUI VPN Panel is now production-ready!**
 
 *Generated with ❤️ by Claude*
 *Version: 2.0.0 Production-Ready*

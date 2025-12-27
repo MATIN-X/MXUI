@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "MX-UI VPN 控制面板",
+    "name": "MXUI VPN 控制面板",
     "description": "专业VPN管理面板",
     "version": "版本"
   },
@@ -551,7 +551,7 @@
     "updateAvailable": "有可用更新"
   },
   "footer": {
-    "copyright": "© 2024 MX-UI VPN 控制面板",
+    "copyright": "© 2024 MXUI VPN 控制面板",
     "version": "版本 {version}",
     "documentation": "文档",
     "support": "支持",

@@ -12,7 +12,7 @@ class AppLocalizations {
 
   static final Map<String, Map<String, String>> _localizedValues = {
     'fa': {
-      'appName': 'MX-UI',
+      'appName': 'MXUI',
       'connect': 'اتصال',
       'disconnect': 'قطع',
       'connected': 'متصل',
@@ -67,7 +67,7 @@ class AppLocalizations {
       'info': 'اطلاعات',
     },
     'en': {
-      'appName': 'MX-UI',
+      'appName': 'MXUI',
       'connect': 'Connect',
       'disconnect': 'Disconnect',
       'connected': 'Connected',

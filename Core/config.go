@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/config.go
 // Centralized Configuration Management: Load, Save, Validate, Watch, Defaults
 
@@ -418,7 +418,7 @@ func DefaultConfig() *Config {
 			DecoyType:      "nginx",
 			Language:       "fa",
 			Theme:          "dark",
-			Title:          "MX-UI Panel",
+			Title:          "MXUI Panel",
 			SessionTimeout: 3600,
 		},
 		Nodes: NodesConfig{

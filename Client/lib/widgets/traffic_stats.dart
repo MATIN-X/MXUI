@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // widgets/traffic_stats.dart - Traffic Statistics Widget
 
 import 'package:flutter/material.dart';

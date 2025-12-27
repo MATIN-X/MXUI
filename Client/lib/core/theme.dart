@@ -1,4 +1,4 @@
-// MX-UI VPN Client
+// MXUI VPN Client
 // core/theme.dart - Application Theme
 
 import 'package:flutter/material.dart';

@@ -1,5 +1,5 @@
 /**
- * MX-UI VPN Panel - Router
+ * MXUI VPN Panel - Router
  * router.js - SPA Routing, Navigation, History
  */
 

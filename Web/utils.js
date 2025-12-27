@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * MX-UI VPN Panel - Utility Functions
+ * MXUI VPN Panel - Utility Functions
  * Part 1: Core Helpers, Storage, Validation, Formatting, Date/Time
  * ============================================================================
  */
@@ -13,7 +13,7 @@
 
 const MXUI = {
     VERSION: '1.0.0',
-    APP_NAME: 'MX-UI VPN Panel',
+    APP_NAME: 'MXUI VPN Panel',
     STORAGE_PREFIX: 'mxui_',
     DEFAULT_LANG: 'en',
     SUPPORTED_LANGS: ['en', 'fa', 'ru', 'zh'],
@@ -1165,7 +1165,7 @@ window.validate = validate;
 window.url = url;
 /**
  * ============================================================================
- * MX-UI VPN Panel - Utility Functions
+ * MXUI VPN Panel - Utility Functions
  * Part 2: DOM, Events, i18n, Clipboard, Debounce, HTTP, Notifications, Theme
  * ============================================================================
  */

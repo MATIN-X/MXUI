@@ -1,5 +1,5 @@
 // ============================================================================
-// MX-UI VPN Panel - Service Worker
+// MXUI VPN Panel - Service Worker
 // Version: 1.0.0
 // ============================================================================
 
@@ -264,7 +264,7 @@ self.addEventListener('push', (event) => {
     console.log('[SW] Push notification received');
     
     let data = {
-        title: 'MX-UI Panel',
+        title: 'MXUI Panel',
         body: 'Ø§Ø¹Ù„Ø§Ù† Ø¬Ø¯ÛŒØ¯',
         icon: '/assets/icon-192.png',
         badge: '/assets/badge-72.png',

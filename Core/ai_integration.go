@@ -1,4 +1,4 @@
-// MX-UI VPN Panel
+// MXUI VPN Panel
 // Core/ai_integration.go
 // AI Integration for Smart Routing & Optimization
 

@@ -1,5 +1,5 @@
 // Core/traffic_collection.go
-// MX-UI VPN Panel - Traffic Collection from Xray/Sing-box Cores
+// MXUI VPN Panel - Traffic Collection from Xray/Sing-box Cores
 // Real-time traffic statistics collection using gRPC (Xray) and HTTP (Sing-box)
 
 package core
