@@ -1,0 +1,431 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+env:
+  GO_VERSION: '1.22'
+  FLUTTER_VERSION: '3.22.0'
+
+jobs:
+  # Build Go backend binaries
+  build-backend:
+    name: Build Backend (${{ matrix.os }}-${{ matrix.arch }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+            ext: ''
+          - os: linux
+            arch: arm64
+            ext: ''
+          - os: darwin
+            arch: amd64
+            ext: ''
+          - os: darwin
+            arch: arm64
+            ext: ''
+          - os: windows
+            arch: amd64
+            ext: '.exe'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Build MXUI Server
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+          CGO_ENABLED: '0'
+        run: |
+          mkdir -p dist
+          go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
+            -o dist/mxui-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} \
+            ./cmd/mxui
+
+      - name: Build MXUI Node
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+          CGO_ENABLED: '0'
+        run: |
+          go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" \
+            -o dist/mxui-node-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} \
+            ./cmd/mxui-node
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-${{ matrix.os }}-${{ matrix.arch }}
+          path: dist/
+          retention-days: 1
+
+  # Build Flutter Android APK
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        working-directory: Client/mxui_client
+        run: flutter pub get
+
+      - name: Build APK
+        working-directory: Client/mxui_client
+        run: |
+          flutter build apk --release \
+            --build-number=${{ github.run_number }} \
+            --build-name=${{ github.ref_name }}
+
+      - name: Build App Bundle
+        working-directory: Client/mxui_client
+        run: |
+          flutter build appbundle --release \
+            --build-number=${{ github.run_number }} \
+            --build-name=${{ github.ref_name }}
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: Client/mxui_client/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 1
+
+      - name: Upload App Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: Client/mxui_client/build/app/outputs/bundle/release/app-release.aab
+          retention-days: 1
+
+  # Build Flutter iOS IPA
+  build-ios:
+    name: Build iOS IPA
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        working-directory: Client/mxui_client
+        run: flutter pub get
+
+      - name: Build iOS (no codesign)
+        working-directory: Client/mxui_client
+        run: |
+          flutter build ios --release --no-codesign \
+            --build-number=${{ github.run_number }} \
+            --build-name=${{ github.ref_name }}
+
+      - name: Create IPA
+        working-directory: Client/mxui_client
+        run: |
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r mxui-ios.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: Client/mxui_client/mxui-ios.ipa
+          retention-days: 1
+
+  # Build Flutter Windows
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        working-directory: Client/mxui_client
+        run: flutter pub get
+
+      - name: Build Windows
+        working-directory: Client/mxui_client
+        run: flutter build windows --release
+
+      - name: Create archive
+        run: |
+          Compress-Archive -Path Client/mxui_client/build/windows/x64/runner/Release/* -DestinationPath mxui-windows-x64.zip
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: mxui-windows-x64.zip
+          retention-days: 1
+
+  # Build Flutter macOS
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        working-directory: Client/mxui_client
+        run: flutter pub get
+
+      - name: Build macOS
+        working-directory: Client/mxui_client
+        run: flutter build macos --release
+
+      - name: Create DMG
+        run: |
+          cd Client/mxui_client/build/macos/Build/Products/Release
+          mkdir -p dmg_contents
+          cp -r "mxui_client.app" dmg_contents/
+          hdiutil create -volname "MX-UI" -srcfolder dmg_contents -ov -format UDZO mxui-macos.dmg
+
+      - name: Upload macOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: Client/mxui_client/build/macos/Build/Products/Release/mxui-macos.dmg
+          retention-days: 1
+
+  # Build Flutter Linux
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        working-directory: Client/mxui_client
+        run: flutter pub get
+
+      - name: Build Linux
+        working-directory: Client/mxui_client
+        run: flutter build linux --release
+
+      - name: Create archive
+        run: |
+          cd Client/mxui_client/build/linux/x64/release
+          tar -czvf mxui-linux-x64.tar.gz bundle/
+
+      - name: Upload Linux build
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64
+          path: Client/mxui_client/build/linux/x64/release/mxui-linux-x64.tar.gz
+          retention-days: 1
+
+  # Create Release
+  create-release:
+    name: Create Release
+    needs: [build-backend, build-android, build-ios, build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Organize release files
+        run: |
+          mkdir -p release
+          
+          # Backend binaries
+          find artifacts -name "mxui-*" -type f -exec mv {} release/ \;
+          
+          # Flutter builds
+          mv artifacts/android-apk/*.apk release/mxui-android.apk || true
+          mv artifacts/ios-ipa/*.ipa release/mxui-ios.ipa || true
+          mv artifacts/windows-x64/*.zip release/ || true
+          mv artifacts/macos-dmg/*.dmg release/ || true
+          mv artifacts/linux-x64/*.tar.gz release/ || true
+          
+          # Generate checksums
+          cd release
+          sha256sum * > SHA256SUMS.txt
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          cat << 'EOF' > release_notes.md
+          ## MX-UI ${{ github.ref_name }}
+          
+          ### Downloads
+          
+          #### Backend Server
+          | Platform | Architecture | Download |
+          |----------|--------------|----------|
+          | Linux | x64 | `mxui-linux-amd64` |
+          | Linux | arm64 | `mxui-linux-arm64` |
+          | macOS | x64 | `mxui-darwin-amd64` |
+          | macOS | Apple Silicon | `mxui-darwin-arm64` |
+          | Windows | x64 | `mxui-windows-amd64.exe` |
+          
+          #### Node Agent
+          | Platform | Architecture | Download |
+          |----------|--------------|----------|
+          | Linux | x64 | `mxui-node-linux-amd64` |
+          | Linux | arm64 | `mxui-node-linux-arm64` |
+          | macOS | x64 | `mxui-node-darwin-amd64` |
+          | macOS | Apple Silicon | `mxui-node-darwin-arm64` |
+          | Windows | x64 | `mxui-node-windows-amd64.exe` |
+          
+          #### Client Apps
+          | Platform | Download |
+          |----------|----------|
+          | Android | `mxui-android.apk` |
+          | iOS | `mxui-ios.ipa` |
+          | Windows | `mxui-windows-x64.zip` |
+          | macOS | `mxui-macos.dmg` |
+          | Linux | `mxui-linux-x64.tar.gz` |
+          
+          ### Installation
+          
+          ```bash
+          # Quick install on Linux
+          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/main/install.sh | bash
+          ```
+          
+          ### Checksums
+          Verify your download with `SHA256SUMS.txt`
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: MX-UI ${{ github.ref_name }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: |
+            release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Docker build
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [build-backend]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download backend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: backend-linux-*
+          path: artifacts
+
+      - name: Prepare binaries
+        run: |
+          mkdir -p bin
+          find artifacts -name "mxui-linux-amd64" -exec cp {} bin/mxui \;
+          chmod +x bin/mxui
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

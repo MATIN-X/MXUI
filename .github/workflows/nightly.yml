@@ -1,0 +1,165 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Run at 2 AM UTC daily
+  workflow_dispatch:
+
+env:
+  GO_VERSION: '1.22'
+  FLUTTER_VERSION: '3.22.0'
+
+jobs:
+  nightly-backend:
+    name: Nightly Backend Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+          - os: linux
+            arch: arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Get commit info
+        id: commit
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+          CGO_ENABLED: '0'
+        run: |
+          mkdir -p dist
+          VERSION="nightly-${{ steps.commit.outputs.sha_short }}"
+          go build -ldflags="-s -w -X main.Version=$VERSION" \
+            -o dist/mxui-${{ matrix.os }}-${{ matrix.arch }} \
+            ./cmd/mxui
+          go build -ldflags="-s -w -X main.Version=$VERSION" \
+            -o dist/mxui-node-${{ matrix.os }}-${{ matrix.arch }} \
+            ./cmd/mxui-node
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-${{ matrix.os }}-${{ matrix.arch }}
+          path: dist/
+          retention-days: 7
+
+  nightly-android:
+    name: Nightly Android Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        working-directory: Client/mxui_client
+        run: flutter pub get
+
+      - name: Build APK
+        working-directory: Client/mxui_client
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-android
+          path: Client/mxui_client/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7
+
+  update-nightly-release:
+    name: Update Nightly Release
+    needs: [nightly-backend, nightly-android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Organize files
+        run: |
+          mkdir -p release
+          find artifacts -type f -exec mv {} release/ \;
+          cd release
+          for f in app-release.apk; do
+            [ -f "$f" ] && mv "$f" "mxui-android-nightly.apk"
+          done
+          sha256sum * > SHA256SUMS.txt
+
+      - name: Delete existing nightly release
+        uses: dev-drprasad/delete-tag-and-release@v1.0
+        with:
+          tag_name: nightly
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          delete_release: true
+        continue-on-error: true
+
+      - name: Create nightly release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly
+          name: Nightly Build
+          body: |
+            ## 🌙 Nightly Build
+            
+            **⚠️ Warning: This is an automated nightly build and may be unstable.**
+            
+            Built from commit: ${{ github.sha }}
+            Build date: ${{ github.event.repository.updated_at }}
+            
+            ### Downloads
+            - `mxui-linux-amd64` - Linux x64 server
+            - `mxui-linux-arm64` - Linux ARM64 server
+            - `mxui-node-linux-amd64` - Linux x64 node agent
+            - `mxui-node-linux-arm64` - Linux ARM64 node agent
+            - `mxui-android-nightly.apk` - Android app
+            
+            For stable releases, please use the [latest release](../../releases/latest).
+          prerelease: true
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cleanup-old-artifacts:
+    name: Cleanup Old Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 30
+          keep_minimum_runs: 10

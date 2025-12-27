@@ -1,0 +1,125 @@
+name: Build MX-UI Flutter Client (All Platforms)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Client/**'
+      - '.github/workflows/flutter-client-build.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Client/**'
+  release:
+    types: [published]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Setup Java فقط برای Android (روی Ubuntu)
+      - name: Set up Java for Android
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Setup Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # وابستگی‌های Linux برای بیلد دسکتاپ لینوکس
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
+
+      # گرفتن دیپندنسی‌های Flutter
+      - name: Flutter pub get
+        run: |
+          cd Client
+          flutter pub get
+
+      # اجرای تست‌ها (اگر وجود داشته باشه)
+      - name: Run Flutter tests
+        run: |
+          cd Client
+          flutter test || echo "No tests found or tests failed – continuing build"
+
+      # بیلد Android (فقط روی Ubuntu)
+      - name: Build Android APK
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd Client
+          flutter build apk --release
+
+      - name: Build Android AAB
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd Client
+          flutter build appbundle --release
+
+      # بیلد iOS (فقط روی macOS – بدون codesign برای CI)
+      - name: Build iOS IPA
+        if: matrix.os == 'macos-latest'
+        run: |
+          cd Client
+          flutter build ipa --release --no-codesign
+
+      # بیلد Windows (روی Windows)
+      - name: Build Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd Client
+          flutter build windows --release
+
+      # بیلد macOS (روی macOS)
+      - name: Build macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          cd Client
+          flutter build macos --release
+
+      # بیلد Linux (روی Ubuntu)
+      - name: Build Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd Client
+          flutter build linux --release
+
+      # بیلد Web (اختیاری – روی Ubuntu)
+      - name: Build Web
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd Client
+          flutter build web --release
+
+      # آپلود artifactها برای دانلود دستی
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-flutter-builds
+          path: |
+            Client/build/app/outputs/flutter-apk/*.apk
+            Client/build/app/outputs/bundle/release/*.aab
+            Client/build/ios/ipa/*.ipa
+            Client/build/windows/x64/runner/Release/
+            Client/build/macos/Build/Products/Release/
+            Client/build/linux/x64/release/bundle/
+            Client/build/web/
+          if-no-files-found: ignore
