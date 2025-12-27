@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#6366f1">
+    <title>Ø§Ø´ØªØ±Ø§Ú© Ù…Ù† - MR-X VPN</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --surface-light: #334155;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --gradient-start: #6366f1;
+            --gradient-end: #8b5cf6;
+        }
+        
+        body {
+            font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        /* ============= CONTAINER ============= */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+        
+        /* ============= HEADER ============= */
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .logo-text {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .welcome-text {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        
+        .username {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        /* ============= STATUS CARD ============= */
+        .status-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .status-badge.expired {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .status-badge.limited {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        
+        .status-badge.onhold {
+            background: rgba(99, 102, 241, 0.2);
+            color: #6366f1;
+        }
+        
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .renew-btn {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .renew-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        /* ============= STATS GRID ============= */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            background: var(--background);
+            padding: 1.25rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        /* Progress bar */
+        .progress-container {
+            margin-top: 1rem;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--background);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-fill.warning {
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+        }
+        
+        /* ============= CONFIGS SECTION ============= */
+        .configs-section {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        
+        .tab-btn {
+            background: var(--background);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn:hover {
+            border-color: var(--primary);
+            color: var(--text);
+        }
+        
+        .tab-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        /* Config card */
+        .config-card {
+            background: var(--background);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+        
+        .config-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .config-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .config-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+        
+        .config-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .config-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            transition: all 0.2s;
+        }
+        
+        .config-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .config-btn.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        /* QR Code */
+        .qr-container {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 0 auto;
+        }
+        
+        .qr-container canvas {
+            display: block;
+        }
+        
+        /* Config link */
+        .config-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--surface);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            direction: ltr;
+            text-align: left;
+        }
+        
+        .config-link code {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .config-link .copy-btn {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        
+        /* ============= SUBSCRIPTION LINK ============= */
+        .subscription-link-section {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .subscription-link-card {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .link-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .link-input {
+            flex: 1;
+            background: var(--background);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.875rem 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            direction: ltr;
+        }
+        
+        .link-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .link-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .link-buttons .config-btn {
+            padding: 0.875rem 1rem;
+        }
+        
+        /* QR Modal */
+        .qr-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .qr-modal.show {
+            display: flex;
+        }
+        
+        .qr-modal-content {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .qr-modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        
+        .qr-modal-close {
+            margin-top: 1.5rem;
+            background: var(--background);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+        
+        /* ============= APPS SECTION ============= */
+        .apps-section {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .app-card {
+            background: var(--background);
+            padding: 1.25rem;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+        }
+        
+        .app-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .app-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .app-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .app-platform {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        /* ============= SUPPORT SECTION ============= */
+        .support-section {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        
+        .support-section p {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+        
+        .support-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #0088cc;
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .support-btn:hover {
+            background: #0077b5;
+            transform: translateY(-2px);
+        }
+        
+        /* ============= LOADING ============= */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: 1rem;
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* ============= ERROR ============= */
+        .error-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+        }
+        
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .error-message {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+        
+        /* ============= TOAST ============= */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface);
+            color: var(--text);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.success {
+            border-right: 4px solid var(--secondary);
+        }
+        
+        .toast.error {
+            border-right: 4px solid var(--danger);
+        }
+        
+        /* ============= RESPONSIVE ============= */
+        @media (max-width: 640px) {
+            .status-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .config-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .config-actions {
+                width: 100%;
+            }
+            
+            .config-btn {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            .link-input-group {
+                flex-direction: column;
+            }
+            
+            .link-buttons {
+                flex-wrap: wrap;
+            }
+            
+            .link-buttons .config-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+        
+        /* ============= RTL/LTR ============= */
+        [dir="ltr"] .toast {
+            border-right: none;
+        }
+        
+        [dir="ltr"] .toast.success {
+            border-left: 4px solid var(--secondary);
+        }
+        
+        [dir="ltr"] .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Loading State -->
+        <div id="loadingState" class="loading">
+            <div class="spinner"></div>
+            <p>Ø¯Ø± Ø­Ø§Ù„ Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ...</p>
+        </div>
+        
+        <!-- Error State -->
+        <div id="errorState" class="error-page" style="display: none;">
+            <div class="error-icon">ðŸ˜•</div>
+            <h2 class="error-title">Ø§Ø´ØªØ±Ø§Ú© ÛŒØ§ÙØª Ù†Ø´Ø¯</h2>
+            <p class="error-message">Ù„ÛŒÙ†Ú© Ø§Ø´ØªØ±Ø§Ú© Ù†Ø§Ù…Ø¹ØªØ¨Ø± Ø§Ø³Øª ÛŒØ§ Ù…Ù†Ù‚Ø¶ÛŒ Ø´Ø¯Ù‡ Ø§Ø³Øª.</p>
+            <a href="/" class="renew-btn">Ø¨Ø§Ø²Ú¯Ø´Øª Ø¨Ù‡ ØµÙØ­Ù‡ Ø§ØµÙ„ÛŒ</a>
+        </div>
+        
+        <!-- Main Content -->
+        <div id="mainContent" style="display: none;">
+            <!-- Header -->
+            <header class="page-header">
+                <div class="logo">
+                    <div class="logo-icon">X</div>
+                    <span class="logo-text">MR-X Panel</span>
+                </div>
+                <p class="welcome-text">Ø®ÙˆØ´ Ø¢Ù…Ø¯ÛŒØ¯ØŒ <span class="username" id="displayUsername">Ú©Ø§Ø±Ø¨Ø±</span></p>
+            </header>
+            
+            <!-- Status Card -->
+            <section class="status-card">
+                <div class="status-header">
+                    <div class="status-badge active" id="statusBadge">
+                        <span id="statusText">ÙØ¹Ø§Ù„</span>
+                    </div>
+                    <a href="#" class="renew-btn" id="renewBtn">
+                        <span>ðŸ”„</span>
+                        ØªÙ…Ø¯ÛŒØ¯ Ø§Ø´ØªØ±Ø§Ú©
+                    </a>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon">ðŸ“Š</div>
+                        <div class="stat-value" id="usedTraffic">0 GB</div>
+                        <div class="stat-label">ØªØ±Ø§ÙÛŒÚ© Ù…ØµØ±ÙÛŒ</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">ðŸ’¾</div>
+                        <div class="stat-value" id="remainingTraffic">0 GB</div>
+                        <div class="stat-label">ØªØ±Ø§ÙÛŒÚ© Ø¨Ø§Ù‚ÛŒâ€ŒÙ…Ø§Ù†Ø¯Ù‡</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">ðŸ“…</div>
+                        <div class="stat-value" id="daysLeft">0 Ø±ÙˆØ²</div>
+                        <div class="stat-label">Ø±ÙˆØ² Ø¨Ø§Ù‚ÛŒâ€ŒÙ…Ø§Ù†Ø¯Ù‡</div>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>ØªØ±Ø§ÙÛŒÚ© Ù…ØµØ±ÙÛŒ</span>
+                        <span id="trafficPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="trafficProgress" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Subscription Link -->
+            <section class="subscription-link-section">
+                <h3 class="section-title">
+                    <span>ðŸ”—</span>
+                    Ù„ÛŒÙ†Ú© Ø§Ø´ØªØ±Ø§Ú©
+                </h3>
+                <div class="subscription-link-card">
+                    <div class="link-input-group">
+                        <input type="text" class="link-input" id="subLinkInput" readonly value="">
+                    </div>
+                    <div class="link-buttons">
+                        <button class="config-btn primary" onclick="copySubLink()">
+                            <span>ðŸ“‹</span>
+                            Ú©Ù¾ÛŒ Ù„ÛŒÙ†Ú©
+                        </button>
+                        <button class="config-btn" onclick="showSubQR()">
+                            <span>ðŸ“±</span>
+                            Ù†Ù…Ø§ÛŒØ´ QR
+                        </button>
+                        <button class="config-btn" onclick="downloadConfigs()">
+                            <span>â¬‡ï¸</span>
+                            Ø¯Ø§Ù†Ù„ÙˆØ¯ Ú©Ø§Ù†ÙÛŒÚ¯
+                        </button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Configs Section -->
+            <section class="configs-section">
+                <h3 class="section-title">
+                    <span>âš™ï¸</span>
+                    Ú©Ø§Ù†ÙÛŒÚ¯â€ŒÙ‡Ø§
+                </h3>
+                
+                <div class="tabs" id="protocolTabs">
+                    <!-- Generated by JS -->
+                </div>
+                
+                <div id="configsList">
+                    <!-- Generated by JS -->
+                </div>
+            </section>
+            
+            <!-- Apps Section -->
+            <section class="apps-section">
+                <h3 class="section-title">
+                    <span>ðŸ“±</span>
+                    Ø§Ù¾Ù„ÛŒÚ©ÛŒØ´Ù†â€ŒÙ‡Ø§ÛŒ Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯ÛŒ
+                </h3>
+                
+                <div class="apps-grid">
+                    <a href="https://play.google.com/store/apps/details?id=com.v2ray.ang" target="_blank" class="app-card">
+                        <div class="app-icon">ðŸ¤–</div>
+                        <div class="app-name">v2rayNG</div>
+                        <div class="app-platform">Android</div>
+                    </a>
+                    <a href="https://apps.apple.com/app/streisand/id6450534064" target="_blank" class="app-card">
+                        <div class="app-icon">ðŸŽ</div>
+                        <div class="app-name">Streisand</div>
+                        <div class="app-platform">iOS</div>
+                    </a>
+                    <a href="https://github.com/2dust/v2rayN/releases" target="_blank" class="app-card">
+                        <div class="app-icon">ðŸªŸ</div>
+                        <div class="app-name">v2rayN</div>
+                        <div class="app-platform">Windows</div>
+                    </a>
+                    <a href="https://apps.apple.com/app/v2box-v2ray-client/id6446814690" target="_blank" class="app-card">
+                        <div class="app-icon">ðŸ’»</div>
+                        <div class="app-name">V2Box</div>
+                        <div class="app-platform">macOS</div>
+                    </a>
+                    <a href="https://github.com/MatsuriDayo/nekoray/releases" target="_blank" class="app-card">
+                        <div class="app-icon">ðŸ§</div>
+                        <div class="app-name">Nekoray</div>
+                        <div class="app-platform">Linux</div>
+                    </a>
+                </div>
+            </section>
+            
+            <!-- Support Section -->
+            <section class="support-section">
+                <h3 class="section-title" style="justify-content: center;">
+                    <span>ðŸ’¬</span>
+                    Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ
+                </h3>
+                <p>Ø¯Ø± ØµÙˆØ±Øª Ø¯Ø§Ø´ØªÙ† Ù‡Ø±Ú¯ÙˆÙ†Ù‡ Ø³ÙˆØ§Ù„ ÛŒØ§ Ù…Ø´Ú©Ù„ØŒ Ø¨Ø§ Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ ØªÙ…Ø§Ø³ Ø¨Ú¯ÛŒØ±ÛŒØ¯.</p>
+                <a href="#" class="support-btn" id="supportBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    </svg>
+                    Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ ØªÙ„Ú¯Ø±Ø§Ù…
+                </a>
+            </section>
+        </div>
+    </div>
+    
+    <!-- QR Modal -->
+    <div class="qr-modal" id="qrModal" onclick="closeQRModal(event)">
+        <div class="qr-modal-content" onclick="event.stopPropagation()">
+            <h3 class="qr-modal-title" id="qrModalTitle">QR Code</h3>
+            <div class="qr-container" id="qrContainer"></div>
+            <button class="qr-modal-close" onclick="closeQRModal()">Ø¨Ø³ØªÙ†</button>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    
+    <script>
+        // ============= GLOBALS =============
+        let userData = null;
+        let configs = [];
+        let subLink = '';
+        
+        // ============= INIT =============
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSubscriptionData();
+        });
+        
+        // ============= API =============
+        async function loadSubscriptionData() {
+            try {
+                // Get token from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token') || window.location.pathname.split('/').pop();
+                
+                if (!token) {
+                    showError();
+                    return;
+                }
+                
+                // For demo - replace with actual API call
+                // const response = await fetch(`/api/subscription/${token}`);
+                // const data = await response.json();
+                
+                // Demo data
+                userData = {
+                    username: 'demo_user',
+                    status: 'active', // active, expired, limited, onhold
+                    traffic_limit: 50 * 1024 * 1024 * 1024, // 50 GB
+                    traffic_used: 15 * 1024 * 1024 * 1024, // 15 GB
+                    expiry_date: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString(),
+                    subscription_link: window.location.origin + '/sub/' + token,
+                    support_telegram: '@mrx_support',
+                    renew_link: 'https://t.me/mrx_bot',
+                    configs: [
+                        {
+                            name: 'VLESS Reality',
+                            protocol: 'vless',
+                            link: 'vless://uuid@server.com:443?security=reality&type=tcp&flow=xtls-rprx-vision#VLESS-Reality'
+                        },
+                        {
+                            name: 'VMess WS',
+                            protocol: 'vmess',
+                            link: 'vmess://eyJhZGQiOiJzZXJ2ZXIuY29tIiwicG9ydCI6IjQ0MyJ9'
+                        },
+                        {
+                            name: 'Trojan',
+                            protocol: 'trojan',
+                            link: 'trojan://password@server.com:443?security=tls#Trojan-TLS'
+                        },
+                        {
+                            name: 'Hysteria2',
+                            protocol: 'hysteria2',
+                            link: 'hysteria2://password@server.com:443?sni=example.com#Hysteria2'
+                        },
+                        {
+                            name: 'Shadowsocks',
+                            protocol: 'ss',
+                            link: 'ss://method:password@server.com:8388#Shadowsocks'
+                        }
+                    ]
+                };
+                
+                configs = userData.configs;
+                subLink = userData.subscription_link;
+                
+                renderSubscription();
+                
+            } catch (error) {
+                console.error('Error loading subscription:', error);
+                showError();
+            }
+        }
+        
+        // ============= RENDER =============
+        function renderSubscription() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            
+            // Username
+            document.getElementById('displayUsername').textContent = userData.username;
+            
+            // Status
+            const statusBadge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+            statusBadge.className = 'status-badge ' + userData.status;
+            
+            const statusLabels = {
+                active: 'ÙØ¹Ø§Ù„',
+                expired: 'Ù…Ù†Ù‚Ø¶ÛŒ Ø´Ø¯Ù‡',
+                limited: 'ØªØ±Ø§ÙÛŒÚ© ØªÙ…Ø§Ù… Ø´Ø¯Ù‡',
+                onhold: 'Ø¯Ø± Ø§Ù†ØªØ¸Ø§Ø±'
+            };
+            statusText.textContent = statusLabels[userData.status] || userData.status;
+            
+            // Traffic
+            const usedGB = (userData.traffic_used / (1024 * 1024 * 1024)).toFixed(2);
+            const limitGB = userData.traffic_limit === 0 ? 'âˆž' : (userData.traffic_limit / (1024 * 1024 * 1024)).toFixed(0);
+            const remainingGB = userData.traffic_limit === 0 ? 'âˆž' : 
+                ((userData.traffic_limit - userData.traffic_used) / (1024 * 1024 * 1024)).toFixed(2);
+            
+            document.getElementById('usedTraffic').textContent = usedGB + ' GB';
+            document.getElementById('remainingTraffic').textContent = remainingGB + ' GB';
+            
+            // Traffic progress
+            const trafficPercent = userData.traffic_limit === 0 ? 0 : 
+                Math.min(100, (userData.traffic_used / userData.traffic_limit) * 100);
+            document.getElementById('trafficPercent').textContent = trafficPercent.toFixed(0) + '%';
+            const progressFill = document.getElementById('trafficProgress');
+            progressFill.style.width = trafficPercent + '%';
+            if (trafficPercent > 80) {
+                progressFill.classList.add('warning');
+            }
+            
+            // Days left
+            const expiryDate = new Date(userData.expiry_date);
+            const now = new Date();
+            const daysLeft = Math.max(0, Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24)));
+            document.getElementById('daysLeft').textContent = daysLeft + ' Ø±ÙˆØ²';
+            
+            // Subscription link
+            document.getElementById('subLinkInput').value = subLink;
+            
+            // Support
+            if (userData.support_telegram) {
+                document.getElementById('supportBtn').href = 'https://t.me/' + userData.support_telegram.replace('@', '');
+            }
+            
+            // Renew link
+            if (userData.renew_link) {
+                document.getElementById('renewBtn').href = userData.renew_link;
+            }
+            
+            // Render configs
+            renderProtocolTabs();
+            renderConfigs();
+        }
+        
+        function renderProtocolTabs() {
+            const protocols = [...new Set(configs.map(c => c.protocol))];
+            const tabsContainer = document.getElementById('protocolTabs');
+            
+            let html = '<button class="tab-btn active" onclick="filterConfigs(\'all\')">Ù‡Ù…Ù‡</button>';
+            
+            const protocolNames = {
+                vless: 'VLESS',
+                vmess: 'VMess',
+                trojan: 'Trojan',
+                hysteria2: 'Hysteria2',
+                ss: 'Shadowsocks',
+                wireguard: 'WireGuard',
+                tuic: 'TUIC'
+            };
+            
+            protocols.forEach(protocol => {
+                html += `<button class="tab-btn" onclick="filterConfigs('${protocol}')">${protocolNames[protocol] || protocol}</button>`;
+            });
+            
+            tabsContainer.innerHTML = html;
+        }
+        
+        function renderConfigs(filter = 'all') {
+            const container = document.getElementById('configsList');
+            const filteredConfigs = filter === 'all' ? configs : configs.filter(c => c.protocol === filter);
+            
+            if (filteredConfigs.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">Ú©Ø§Ù†ÙÛŒÚ¯ÛŒ ÛŒØ§ÙØª Ù†Ø´Ø¯</p>';
+                return;
+            }
+            
+            let html = '';
+            filteredConfigs.forEach((config, index) => {
+                html += `
+                    <div class="config-card">
+                        <div class="config-header">
+                            <div class="config-name">
+                                <span>${getProtocolIcon(config.protocol)}</span>
+                                ${config.name}
+                                <span class="config-badge">${config.protocol.toUpperCase()}</span>
+                            </div>
+                            <div class="config-actions">
+                                <button class="config-btn" onclick="copyConfig(${index})">
+                                    <span>ðŸ“‹</span>
+                                    Ú©Ù¾ÛŒ
+                                </button>
+                                <button class="config-btn" onclick="showConfigQR(${index})">
+                                    <span>ðŸ“±</span>
+                                    QR
+                                </button>
+                            </div>
+                        </div>
+                        <div class="config-link">
+                            <code>${truncateLink(config.link)}</code>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function filterConfigs(protocol) {
+            // Update tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(protocol) || 
+                    (protocol === 'all' && btn.textContent === 'Ù‡Ù…Ù‡')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            renderConfigs(protocol);
+        }
+        
+        // ============= HELPERS =============
+        function getProtocolIcon(protocol) {
+            const icons = {
+                vless: 'âš¡',
+                vmess: 'ðŸ”·',
+                trojan: 'ðŸ”º',
+                hysteria2: 'ðŸš€',
+                ss: 'ðŸŒ‘',
+                wireguard: 'ðŸ”’',
+                tuic: 'ðŸŒŠ'
+            };
+            return icons[protocol] || 'âš™ï¸';
+        }
+        
+        function truncateLink(link) {
+            if (link.length > 60) {
+                return link.substring(0, 30) + '...' + link.substring(link.length - 25);
+            }
+            return link;
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // ============= ACTIONS =============
+        function copySubLink() {
+            navigator.clipboard.writeText(subLink).then(() => {
+                showToast('Ù„ÛŒÙ†Ú© Ø§Ø´ØªØ±Ø§Ú© Ú©Ù¾ÛŒ Ø´Ø¯!', 'success');
+            }).catch(() => {
+                // Fallback
+                const input = document.getElementById('subLinkInput');
+                input.select();
+                document.execCommand('copy');
+                showToast('Ù„ÛŒÙ†Ú© Ø§Ø´ØªØ±Ø§Ú© Ú©Ù¾ÛŒ Ø´Ø¯!', 'success');
+            });
+        }
+        
+        function copyConfig(index) {
+            const config = configs[index];
+            navigator.clipboard.writeText(config.link).then(() => {
+                showToast('Ú©Ø§Ù†ÙÛŒÚ¯ Ú©Ù¾ÛŒ Ø´Ø¯!', 'success');
+            }).catch(() => {
+                showToast('Ø®Ø·Ø§ Ø¯Ø± Ú©Ù¾ÛŒ Ú©Ø±Ø¯Ù†', 'error');
+            });
+        }
+        
+        function showSubQR() {
+            showQRModal('Ù„ÛŒÙ†Ú© Ø§Ø´ØªØ±Ø§Ú©', subLink);
+        }
+        
+        function showConfigQR(index) {
+            const config = configs[index];
+            showQRModal(config.name, config.link);
+        }
+        
+        function showQRModal(title, text) {
+            const modal = document.getElementById('qrModal');
+            const container = document.getElementById('qrContainer');
+            const titleEl = document.getElementById('qrModalTitle');
+            
+            titleEl.textContent = title;
+            container.innerHTML = '';
+            
+            QRCode.toCanvas(text, {
+                width: 256,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#ffffff'
+                }
+            }, (error, canvas) => {
+                if (error) {
+                    console.error(error);
+                    container.innerHTML = '<p style="color: red;">Ø®Ø·Ø§ Ø¯Ø± Ø§ÛŒØ¬Ø§Ø¯ QR Code</p>';
+                    return;
+                }
+                container.appendChild(canvas);
+            });
+            
+            modal.classList.add('show');
+        }
+        
+        function closeQRModal(event) {
+            if (event && event.target !== document.getElementById('qrModal')) return;
+            document.getElementById('qrModal').classList.remove('show');
+        }
+        
+        function downloadConfigs() {
+            // Create config file content
+            let content = '# MR-X VPN Configs\n';
+            content += '# User: ' + userData.username + '\n';
+            content += '# Generated: ' + new Date().toISOString() + '\n\n';
+            
+            configs.forEach(config => {
+                content += '# ' + config.name + '\n';
+                content += config.link + '\n\n';
+            });
+            
+            // Download
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mrx-configs.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('ÙØ§ÛŒÙ„ Ú©Ø§Ù†ÙÛŒÚ¯ Ø¯Ø§Ù†Ù„ÙˆØ¯ Ø´Ø¯!', 'success');
+        }
+        
+        // ============= UI =============
+        function showError() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'flex';
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // ============= KEYBOARD =============
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeQRModal();
+            }
+        });
+    </script>
+</body>
+</html>

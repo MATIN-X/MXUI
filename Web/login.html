@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="description" content="MX-UI VPN Panel - Login">
+
+    <title>ورود | MX-UI VPN Panel</title>
+
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/styles.css">
+
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            padding: 1rem;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-logo svg {
+            width: 48px;
+            height: 48px;
+            color: white;
+        }
+
+        .login-header h1 {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .login-header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0.5rem 0 0;
+            font-size: 0.9rem;
+        }
+
+        .login-body {
+            padding: 2rem;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .login-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .login-form .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .login-form .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .login-form .input-group {
+            position: relative;
+        }
+
+        .login-form .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .login-form .input-group .form-control {
+            padding-left: 3rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.25rem;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .remember-me input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-btn .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .two-factor-group {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .two-factor-group.hidden {
+            display: none;
+        }
+
+        .otp-input {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .otp-input input {
+            width: 45px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
+
+        .otp-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .login-footer {
+            padding: 1.5rem 2rem;
+            background: var(--bg-secondary);
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        .login-footer a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin: 0 0.5rem;
+        }
+
+        .login-footer a:hover {
+            color: var(--primary);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* RTL Adjustments */
+        [dir="rtl"] .login-form .input-icon,
+        [dir="rtl"] .password-toggle {
+            left: auto;
+            right: 1rem;
+        }
+
+        [dir="rtl"] .login-form .input-group .form-control {
+            padding-left: 1rem;
+            padding-right: 3rem;
+        }
+    </style>
+</head>
+<body class="theme-dark">
+    <div class="login-page">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <h1>MX-UI VPN Panel</h1>
+                <p>به پنل مدیریت خوش آمدید</p>
+            </div>
+
+            <div class="login-body">
+                <div class="error-message" id="error-message"></div>
+
+                <form id="login-form" class="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="username">نام کاربری</label>
+                        <div class="input-group">
+                            <input type="text" id="username" name="username" class="form-control"
+                                placeholder="نام کاربری خود را وارد کنید" required autofocus>
+                            <span class="input-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">رمز عبور</label>
+                        <div class="input-group">
+                            <input type="password" id="password" name="password" class="form-control"
+                                placeholder="رمز عبور خود را وارد کنید" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <svg id="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="two-factor-group hidden" id="two-factor-group">
+                        <label>کد تایید دو مرحله‌ای</label>
+                        <div class="otp-input">
+                            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-index="0">
+                            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-index="1">
+                            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-index="2">
+                            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-index="3">
+                            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-index="4">
+                            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-index="5">
+                        </div>
+                        <input type="hidden" id="two-factor" name="two_factor">
+                    </div>
+
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" name="remember" id="remember">
+                            <span>مرا به خاطر بسپار</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="login-btn" id="login-btn">
+                        <span>ورود به پنل</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="login-footer">
+                <a href="https://github.com/MATIN-X/MX-UI" target="_blank">GitHub</a>
+                <span>|</span>
+                <span>نسخه 2.0.0</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="/utils.js"></script>
+    <script src="/api.js"></script>
+
+    <script>
+        // Check if already logged in
+        (function() {
+            const token = storage.get('auth_token');
+            if (token) {
+                window.location.href = '/dashboard.html';
+            }
+        })();
+
+        // Toggle password visibility
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('eye-icon');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+            } else {
+                input.type = 'password';
+                icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            }
+        }
+
+        // OTP input handling
+        document.querySelectorAll('.otp-digit').forEach((input, index, inputs) => {
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+
+                // Only allow numbers
+                if (!/^\d*$/.test(value)) {
+                    e.target.value = '';
+                    return;
+                }
+
+                // Move to next input
+                if (value && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+
+                // Update hidden field
+                updateOTPValue();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                // Handle backspace
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                const digits = paste.replace(/\D/g, '').split('');
+
+                digits.forEach((digit, i) => {
+                    if (inputs[index + i]) {
+                        inputs[index + i].value = digit;
+                    }
+                });
+
+                updateOTPValue();
+            });
+        });
+
+        function updateOTPValue() {
+            const digits = Array.from(document.querySelectorAll('.otp-digit'))
+                .map(input => input.value)
+                .join('');
+            document.getElementById('two-factor').value = digits;
+        }
+
+        // Handle login
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const username = form.username.value;
+            const password = form.password.value;
+            const twoFactor = form.two_factor.value || null;
+            const remember = form.remember.checked;
+
+            const submitBtn = document.getElementById('login-btn');
+            const errorMessage = document.getElementById('error-message');
+
+            // Hide previous error
+            errorMessage.classList.remove('show');
+
+            // Show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="spinner"></div><span>در حال ورود...</span>';
+
+            try {
+                const response = await api.post('/auth/login', {
+                    username,
+                    password,
+                    two_factor_code: twoFactor
+                });
+
+                if (response.requires_2fa) {
+                    // Show 2FA input
+                    document.getElementById('two-factor-group').classList.remove('hidden');
+                    document.querySelector('.otp-digit[data-index="0"]').focus();
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>تایید کد</span>';
+                    return;
+                }
+
+                // Store tokens
+                const expiryMinutes = remember ? 60 * 24 * 30 : 60 * 24; // 30 days or 1 day
+                storage.set('auth_token', response.token, expiryMinutes);
+                if (response.refresh_token) {
+                    storage.set('refresh_token', response.refresh_token, 60 * 24 * 7);
+                }
+                storage.set('admin_data', response.admin);
+
+                // Redirect to dashboard
+                window.location.href = '/dashboard.html';
+
+            } catch (error) {
+                errorMessage.textContent = error.message || 'نام کاربری یا رمز عبور اشتباه است';
+                errorMessage.classList.add('show');
+
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>ورود به پنل</span>';
+            }
+        }
+    </script>
+</body>
+</html>
