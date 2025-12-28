@@ -354,7 +354,20 @@ func Run() {
 		log.Fatalf("❌ Database initialization failed: %v", err)
 	}
 
+	// Initialize managers
 	initManagers()
+
+	// Initialize user and admin managers
+	if err := InitUserManager(); err != nil {
+		log.Printf("⚠️  User manager init warning: %v", err)
+	}
+	if err := InitAdminManager(); err != nil {
+		log.Printf("⚠️  Admin manager init warning: %v", err)
+	}
+	if err := InitAuthManager(); err != nil {
+		log.Printf("⚠️  Auth manager init warning: %v", err)
+	}
+	InitSessionManager()
 
 	for _, mgr := range managers {
 		if err := mgr.Start(); err != nil {
