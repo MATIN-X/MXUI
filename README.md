@@ -21,7 +21,7 @@
   <a href="https://github.com/MR-X-Panel/MR-X/issues">
     <img src="https://img.shields.io/github/issues/MR-X-Panel/MR-X?style=flat-square" alt="Issues"/>
   </a>
-  <a href="https://t.me/MRX_Support">
+  <a href="https://t.me/Mxui_Support">
     <img src="https://img.shields.io/badge/Telegram-Support-blue?style=flat-square&logo=telegram" alt="Telegram"/>
   </a>
 </p>
@@ -168,26 +168,26 @@ Create a `.env` file or set these environment variables:
 
 ```bash
 # Server
-MRX_PORT=8443
-MRX_API_PORT=8080
+Mxui_PORT=8443
+Mxui_API_PORT=8080
 
 # Admin
-MRX_ADMIN_USER=admin
-MRX_ADMIN_PASS=your_secure_password
+Mxui_ADMIN_USER=admin
+Mxui_ADMIN_PASS=your_secure_password
 
 # Security
-MRX_JWT_SECRET=your_jwt_secret
-MRX_API_KEY=your_api_key
+Mxui_JWT_SECRET=your_jwt_secret
+Mxui_API_KEY=your_api_key
 
 # SSL
-MRX_SSL_ENABLED=true
-MRX_DOMAIN=panel.example.com
-MRX_AUTO_TLS=true
+Mxui_SSL_ENABLED=true
+Mxui_DOMAIN=panel.example.com
+Mxui_AUTO_TLS=true
 ```
 
 ### Configuration File
 
-Edit `/opt/mrx/config.yaml`:
+Edit `/opt/Mxui/config.yaml`:
 
 ```yaml
 server:
@@ -196,7 +196,7 @@ server:
 
 database:
   type: "sqlite"
-  path: "/opt/mrx/data/mrx.db"
+  path: "/opt/Mxui/data/Mxui.db"
 
 ssl:
   enabled: true
@@ -223,13 +223,13 @@ Default credentials are shown after installation. **Change them immediately!**
 
 ```bash
 # Service management
-systemctl start mrx      # Start
-systemctl stop mrx       # Stop
-systemctl restart mrx    # Restart
-systemctl status mrx     # Status
+systemctl start Mxui      # Start
+systemctl stop Mxui       # Stop
+systemctl restart Mxui    # Restart
+systemctl status Mxui     # Status
 
 # View logs
-journalctl -u mrx -f
+journalctl -u Mxui -f
 
 # Update
 bash <(curl -sL https://raw.githubusercontent.com/MR-X-Panel/MR-X/main/update.sh)
@@ -242,24 +242,24 @@ bash <(curl -sL https://raw.githubusercontent.com/MR-X-Panel/MR-X/main/uninstall
 
 ```bash
 # Show version
-mrx version
+Mxui version
 
 # Generate config
-mrx config generate
+Mxui config generate
 
 # Database operations
-mrx db migrate
-mrx db backup
-mrx db restore backup.sql
+Mxui db migrate
+Mxui db backup
+Mxui db restore backup.sql
 
 # User management
-mrx user list
-mrx user create --username test --traffic 10GB --days 30
-mrx user delete --username test
+Mxui user list
+Mxui user create --username test --traffic 10GB --days 30
+Mxui user delete --username test
 
 # Core management
-mrx core status
-mrx core restart
+Mxui core status
+Mxui core restart
 ```
 
 ---
@@ -350,13 +350,13 @@ backup:
 
 ```bash
 # Create backup
-mrx backup create
+Mxui backup create
 
 # List backups
-mrx backup list
+Mxui backup list
 
 # Restore backup
-mrx backup restore backup_20240101.tar.gz
+Mxui backup restore backup_20240101.tar.gz
 ```
 
 ---
@@ -386,7 +386,7 @@ panel:
 **Panel not accessible:**
 ```bash
 # Check service status
-systemctl status mrx
+systemctl status Mxui
 
 # Check port
 ss -tlnp | grep 8443
@@ -398,32 +398,32 @@ ufw status
 **Database errors:**
 ```bash
 # Check database
-sqlite3 /opt/mrx/data/mrx.db ".tables"
+sqlite3 /opt/Mxui/data/Mxui.db ".tables"
 
 # Repair database
-mrx db repair
+Mxui db repair
 ```
 
 **Core not starting:**
 ```bash
 # Check Xray logs
-tail -f /opt/mrx/logs/xray_error.log
+tail -f /opt/Mxui/logs/xray_error.log
 
 # Validate config
-/opt/mrx/bin/xray -test -config /opt/mrx/data/xray_config.json
+/opt/Mxui/bin/xray -test -config /opt/Mxui/data/xray_config.json
 ```
 
 ### Logs
 
 ```bash
 # Panel logs
-tail -f /opt/mrx/logs/mrx.log
+tail -f /opt/Mxui/logs/Mxui.log
 
 # Access logs
-tail -f /opt/mrx/logs/access.log
+tail -f /opt/Mxui/logs/access.log
 
 # Xray logs
-tail -f /opt/mrx/logs/xray_access.log
+tail -f /opt/Mxui/logs/xray_access.log
 ```
 
 ---
@@ -473,7 +473,7 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 ## 📞 Support
 
 - **GitHub Issues**: [Report bugs](https://github.com/MR-X-Panel/MR-X/issues)
-- **Telegram**: [@MRX_Support](https://t.me/MRX_Support)
+- **Telegram**: [@Mxui_Support](https://t.me/Mxui_Support)
 - **Documentation**: [Wiki](https://github.com/MR-X-Panel/MR-X/wiki)
 
 ---

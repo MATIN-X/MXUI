@@ -14,7 +14,7 @@ First off, thank you for considering contributing to MR-X! It's people like you 
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [support@mrx-panel.com](mailto:support@mrx-panel.com).
+This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [support@Mxui-panel.com](mailto:support@Mxui-panel.com).
 
 ### Our Standards
 
@@ -52,7 +52,7 @@ This project and everyone participating in it is governed by our Code of Conduct
 Before creating bug reports, please check existing issues to avoid duplicates.
 
 **When reporting a bug, include:**
-- MR-X version (`mrx version`)
+- MR-X version (`Mxui version`)
 - Operating system and version
 - Go version (`go version`)
 - Steps to reproduce
@@ -132,7 +132,7 @@ make dev
 
 # Or manual run
 make build
-./bin/mrx serve --config config.local.yaml
+./bin/Mxui serve --config config.local.yaml
 ```
 
 ### 4. Run Tests
@@ -345,7 +345,7 @@ MR-X/
 
 - **Documentation**: [Wiki](https://github.com/MR-X-Panel/MR-X/wiki)
 - **Discussions**: [GitHub Discussions](https://github.com/MR-X-Panel/MR-X/discussions)
-- **Telegram**: [@MRX_Support](https://t.me/MRX_Support)
+- **Telegram**: [@Mxui_Support](https://t.me/Mxui_Support)
 
 ## Recognition
 

@@ -8,10 +8,10 @@
 #       VERSION: 1.0.0
 #
 #   BUILD:
-#       docker build -t mrx:latest .
+#       docker build -t Mxui:latest .
 #
 #   RUN:
-#       docker run -d --name mrx --network host mrx:latest
+#       docker run -d --name Mxui --network host Mxui:latest
 #
 #===============================================================================
 
@@ -52,7 +52,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
         -X 'main.Version=${VERSION}' \
         -X 'main.BuildTime=${BUILD_TIME}' \
         -X 'main.GitCommit=${GIT_COMMIT}'" \
-    -o /build/mrx \
+    -o /build/Mxui \
     ./Core/main.go
 
 #===============================================================================
@@ -110,13 +110,13 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user (optional, disabled for VPN functionality)
-# RUN addgroup -S mrx && adduser -S mrx -G mrx
+# RUN addgroup -S Mxui && adduser -S Mxui -G Mxui
 
 # Create directories
 RUN mkdir -p /app/{bin,data,logs,web,certs,backups}
 
 # Copy binary from builder
-COPY --from=builder /build/mrx /app/bin/mrx
+COPY --from=builder /build/Mxui /app/bin/Mxui
 
 # Copy Xray from downloader
 COPY --from=xray-downloader /xray/xray /app/bin/xray
@@ -130,7 +130,7 @@ COPY Web/ /app/web/
 COPY config.yaml /app/config.yaml
 
 # Set permissions
-RUN chmod +x /app/bin/mrx /app/bin/xray && \
+RUN chmod +x /app/bin/Mxui /app/bin/xray && \
     chmod 755 /app && \
     chmod 700 /app/data /app/logs /app/certs /app/backups
 
@@ -138,12 +138,12 @@ RUN chmod +x /app/bin/mrx /app/bin/xray && \
 WORKDIR /app
 
 # Environment variables
-ENV MRX_CONFIG=/app/config.yaml \
-    MRX_DATA_DIR=/app/data \
-    MRX_LOG_DIR=/app/logs \
-    MRX_HOST=0.0.0.0 \
-    MRX_PORT=8443 \
-    MRX_API_PORT=8080 \
+ENV Mxui_CONFIG=/app/config.yaml \
+    Mxui_DATA_DIR=/app/data \
+    Mxui_LOG_DIR=/app/logs \
+    Mxui_HOST=0.0.0.0 \
+    Mxui_PORT=8443 \
+    Mxui_API_PORT=8080 \
     TZ=UTC \
     GOGC=100
 
@@ -164,10 +164,10 @@ VOLUME ["/app/data", "/app/logs", "/app/certs", "/app/backups"]
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -sf http://localhost:${MRX_PORT}/health || exit 1
+    CMD curl -sf http://localhost:${Mxui_PORT}/health || exit 1
 
 # Entry point
-ENTRYPOINT ["/app/bin/mrx"]
+ENTRYPOINT ["/app/bin/Mxui"]
 
 # Default command
 CMD ["serve", "--config", "/app/config.yaml"]

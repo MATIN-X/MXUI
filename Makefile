@@ -10,7 +10,7 @@
 #===============================================================================
 
 # Variables
-APP_NAME := mrx
+APP_NAME := Mxui
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "1.0.0")
 BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
@@ -49,7 +49,7 @@ CGO_ENABLED := 0
 PLATFORMS := linux/amd64 linux/arm64 linux/armv7 darwin/amd64 darwin/arm64 windows/amd64
 
 # Docker settings
-DOCKER_IMAGE := ghcr.io/mr-x-panel/mrx
+DOCKER_IMAGE := ghcr.io/mr-x-panel/Mxui
 DOCKER_TAG := $(VERSION)
 
 #===============================================================================
@@ -249,8 +249,8 @@ docker-run:
 	docker run -d \
 		--name $(APP_NAME) \
 		--network host \
-		-v mrx_data:/app/data \
-		-v mrx_logs:/app/logs \
+		-v Mxui_data:/app/data \
+		-v Mxui_logs:/app/logs \
 		$(DOCKER_IMAGE):$(DOCKER_TAG)
 	@echo "✅ Container started"
 
@@ -308,23 +308,23 @@ release-web:
 .PHONY: install
 install: build
 	@echo "📥 Installing $(APP_NAME)..."
-	@sudo mkdir -p /opt/mrx/{bin,data,logs,web,certs,backups}
-	@sudo cp $(BIN_DIR)/$(APP_NAME) /opt/mrx/bin/
-	@sudo cp -r $(WEB_DIR)/* /opt/mrx/web/
-	@sudo cp config.yaml /opt/mrx/
-	@sudo cp mrx.service /etc/systemd/system/
+	@sudo mkdir -p /opt/Mxui/{bin,data,logs,web,certs,backups}
+	@sudo cp $(BIN_DIR)/$(APP_NAME) /opt/Mxui/bin/
+	@sudo cp -r $(WEB_DIR)/* /opt/Mxui/web/
+	@sudo cp config.yaml /opt/Mxui/
+	@sudo cp Mxui.service /etc/systemd/system/
 	@sudo systemctl daemon-reload
 	@echo "✅ Installation complete"
-	@echo "   Run: sudo systemctl enable --now mrx"
+	@echo "   Run: sudo systemctl enable --now Mxui"
 
 .PHONY: uninstall
 uninstall:
 	@echo "📤 Uninstalling $(APP_NAME)..."
-	@sudo systemctl stop mrx || true
-	@sudo systemctl disable mrx || true
-	@sudo rm -f /etc/systemd/system/mrx.service
+	@sudo systemctl stop Mxui || true
+	@sudo systemctl disable Mxui || true
+	@sudo rm -f /etc/systemd/system/Mxui.service
 	@sudo systemctl daemon-reload
-	@echo "⚠️  Data directory /opt/mrx NOT removed. Remove manually if needed."
+	@echo "⚠️  Data directory /opt/Mxui NOT removed. Remove manually if needed."
 	@echo "✅ Uninstall complete"
 
 #===============================================================================

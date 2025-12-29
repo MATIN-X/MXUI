@@ -1131,7 +1131,7 @@ func (dm *DatabaseManager) createDefaultOwner() error {
 // ============================================================================
 
 func (dm *DatabaseManager) deriveKey(password string) []byte {
-	salt := []byte("MRX-VPN-PANEL-SALT") // In production, use random salt stored separately
+	salt := []byte("Mxui-VPN-PANEL-SALT") // In production, use random salt stored separately
 	return pbkdf2.Key([]byte(password), salt, EncryptionIterations, EncryptionKeyLength, sha256.New)
 }
 

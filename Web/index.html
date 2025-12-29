@@ -233,13 +233,13 @@
     </div>
 
     <div class="footer">
-        <p>پشتیبانی: <a href="https://t.me/MRX_Support" target="_blank">@MRX_Support</a></p>
+        <p>پشتیبانی: <a href="https://t.me/Mxui_Support" target="_blank">@Mxui_Support</a></p>
     </div>
 
     <script>
         // Check if already logged in
         window.addEventListener('DOMContentLoaded', function() {
-            const token = localStorage.getItem('mrx_token');
+            const token = localStorage.getItem('Mxui_token');
             if (token) {
                 // Verify token
                 fetch('/api/v1/verify', {
@@ -252,11 +252,11 @@
                     if (response.ok) {
                         window.location.href = '/dashboard.html';
                     } else {
-                        localStorage.removeItem('mrx_token');
+                        localStorage.removeItem('Mxui_token');
                     }
                 })
                 .catch(() => {
-                    localStorage.removeItem('mrx_token');
+                    localStorage.removeItem('Mxui_token');
                 });
             }
         });
@@ -297,7 +297,7 @@
 
                 if (response.ok && data.success) {
                     // Save token
-                    localStorage.setItem('mrx_token', data.token);
+                    localStorage.setItem('Mxui_token', data.token);
                     
                     showAlert('ورود موفقیت‌آمیز! در حال انتقال...', 'success');
                     

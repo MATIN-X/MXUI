@@ -1230,7 +1230,7 @@ func (b *TelegramBot) cmdSupport(bot *TelegramBot, update *Update) error {
 ðŸ• Ø³Ø§Ø¹Ø§Øª Ù¾Ø§Ø³Ø®Ú¯ÙˆÛŒÛŒ: 9 ØµØ¨Ø­ ØªØ§ 12 Ø´Ø¨
 
 ðŸ“± Ø±Ø§Ù‡â€ŒÙ‡Ø§ÛŒ Ø§Ø±ØªØ¨Ø§Ø·ÛŒ:
-â€¢ ØªÙ„Ú¯Ø±Ø§Ù…: @MRX_Support
+â€¢ ØªÙ„Ú¯Ø±Ø§Ù…: @Mxui_Support
 â€¢ Ø§ÛŒÙ…ÛŒÙ„: support@mxui-vpn.com
 
 âš¡ Ù…Ø¹Ù…ÙˆÙ„Ø§Ù‹ Ø¯Ø± Ú©Ù…ØªØ± Ø§Ø² 1 Ø³Ø§Ø¹Øª Ù¾Ø§Ø³Ø® Ù…ÛŒâ€ŒØ¯Ù‡ÛŒÙ….
@@ -1238,7 +1238,7 @@ func (b *TelegramBot) cmdSupport(bot *TelegramBot, update *Update) error {
 
 	keyboard := &InlineKeyboardMarkup{
 		InlineKeyboard: [][]InlineKeyboardButton{
-			{{Text: "ðŸ’¬ Ú†Øª Ø¨Ø§ Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ", URL: "https://t.me/MRX_Support"}},
+			{{Text: "ðŸ’¬ Ú†Øª Ø¨Ø§ Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ", URL: "https://t.me/Mxui_Support"}},
 			{{Text: "âŒ Ø¨Ø³ØªÙ†", CallbackData: CallbackClose}},
 		},
 	}
@@ -2132,7 +2132,7 @@ func (b *TelegramBot) handleSubscriptionDeepLink(chatID int64, userID int64, tok
 	keyboard := &InlineKeyboardMarkup{
 		InlineKeyboard: [][]InlineKeyboardButton{
 			{{Text: "ðŸ”— Ø¯Ø±ÛŒØ§ÙØª Ù„ÛŒÙ†Ú© Ø§ØªØµØ§Ù„", CallbackData: fmt.Sprintf("%s%d", CallbackUserLink, user.ID)}},
-			{{Text: "ðŸ“ž Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ", URL: "https://t.me/MRX_Support"}},
+			{{Text: "ðŸ“ž Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ", URL: "https://t.me/Mxui_Support"}},
 		},
 	}
 
