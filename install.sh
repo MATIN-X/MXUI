@@ -151,9 +151,13 @@ download_and_build() {
 
     log_info "Building MXUI binary..."
     export PATH=$PATH:/usr/local/go/bin
+    export CGO_ENABLED=1
 
+    go mod download
     go mod tidy
-    CGO_ENABLED=1 go build -ldflags="-s -w -X main.Version=${VERSION}" -o mxui ./cmd/mxui
+
+    # Build with simple flags to avoid linker issues
+    go build -ldflags "-s -w" -o mxui ./cmd/mxui
 
     if [[ ! -f mxui ]]; then
         log_error "Build failed!"
