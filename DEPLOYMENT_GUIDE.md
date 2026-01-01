@@ -64,10 +64,10 @@
 
 ```bash
 # Download and run installer
-bash <(curl -Ls https://raw.githubusercontent.com/YOUR-REPO/MXUI/main/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/matin-x/mxui/main/install.sh)
 
 # Or clone and install
-git clone https://github.com/YOUR-REPO/MXUI.git
+git clone https://github.com/matin-x/mxui.git
 cd MXUI
 chmod +x install.sh
 ./install.sh
@@ -85,7 +85,7 @@ The installer will:
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/YOUR-REPO/MXUI.git
+git clone https://github.com/matin-x/mxui.git
 cd MXUI
 
 # 2. Install Go dependencies

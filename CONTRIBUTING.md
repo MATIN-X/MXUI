@@ -1,6 +1,6 @@
-# Contributing to MR-X
+# Contributing to MXUI
 
-First off, thank you for considering contributing to MR-X! It's people like you that make MR-X such a great tool.
+First off, thank you for considering contributing to MXUI! It's people like you that make MXUI such a great tool.
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@ First off, thank you for considering contributing to MR-X! It's people like you 
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [support@Mxui-panel.com](mailto:support@Mxui-panel.com).
+This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [support@mxui-panel.com](mailto:support@mxui-panel.com).
 
 ### Our Standards
 
@@ -37,12 +37,12 @@ This project and everyone participating in it is governed by our Code of Conduct
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/YOUR-USERNAME/MR-X.git
-   cd MR-X
+   git clone https://github.com/YOUR-USERNAME/mxui.git
+   cd MXUI
    ```
 3. Add the upstream remote:
    ```bash
-   git remote add upstream https://github.com/MR-X-Panel/MR-X.git
+   git remote add upstream https://github.com/matin-x/mxui.git
    ```
 
 ## How Can I Contribute?
@@ -52,7 +52,7 @@ This project and everyone participating in it is governed by our Code of Conduct
 Before creating bug reports, please check existing issues to avoid duplicates.
 
 **When reporting a bug, include:**
-- MR-X version (`Mxui version`)
+- MXUI version (`mxui version`)
 - Operating system and version
 - Go version (`go version`)
 - Steps to reproduce
@@ -79,7 +79,7 @@ If applicable, add screenshots or logs.
 
 **Environment:**
 - OS: [e.g., Ubuntu 22.04]
-- MR-X Version: [e.g., 1.0.0]
+- MXUI Version: [e.g., 1.0.0]
 - Go Version: [e.g., 1.22]
 - Browser: [e.g., Chrome 120]
 
@@ -132,7 +132,7 @@ make dev
 
 # Or manual run
 make build
-./bin/Mxui serve --config config.local.yaml
+./bin/mxui serve --config config.local.yaml
 ```
 
 ### 4. Run Tests
@@ -323,7 +323,7 @@ Fixes #(issue)
 ## Project Structure
 
 ```
-MR-X/
+MXUI/
 ├── Core/               # Go backend code
 │   ├── main.go        # Entry point
 │   ├── api.go         # API handlers
@@ -343,8 +343,8 @@ MR-X/
 
 ## Getting Help
 
-- **Documentation**: [Wiki](https://github.com/MR-X-Panel/MR-X/wiki)
-- **Discussions**: [GitHub Discussions](https://github.com/MR-X-Panel/MR-X/discussions)
+- **Documentation**: [Wiki](https://github.com/matin-x/mxui/wiki)
+- **Discussions**: [GitHub Discussions](https://github.com/matin-x/mxui/discussions)
 - **Telegram**: [@mxui_support](https://t.me/mxui_support)
 
 ## Recognition

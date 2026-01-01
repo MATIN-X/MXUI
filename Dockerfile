@@ -2,16 +2,16 @@
 #
 #          FILE: Dockerfile
 #
-#   DESCRIPTION: MR-X VPN Panel Docker Image
+#   DESCRIPTION: MXUI VPN Panel Docker Image
 #
-#        AUTHOR: MR-X Team
-#       VERSION: 1.0.0
+#        AUTHOR: MXUI Team
+#       VERSION: 2.0.0
 #
 #   BUILD:
-#       docker build -t Mxui:latest .
+#       docker build -t mxui:latest .
 #
 #   RUN:
-#       docker run -d --name Mxui --network host Mxui:latest
+#       docker run -d --name mxui --network host mxui:latest
 #
 #===============================================================================
 
@@ -52,8 +52,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
         -X 'main.Version=${VERSION}' \
         -X 'main.BuildTime=${BUILD_TIME}' \
         -X 'main.GitCommit=${GIT_COMMIT}'" \
-    -o /build/Mxui \
-    ./Core/main.go
+    -o /build/mxui \
+    ./cmd/mxui
 
 #===============================================================================
 # Stage 2: Download Xray
@@ -87,13 +87,13 @@ RUN curl -sL -o /xray/geoip.dat "https://github.com/Loyalsoldier/v2ray-rules-dat
 FROM alpine:3.19
 
 # Labels
-LABEL maintainer="MR-X Team" \
-      org.opencontainers.image.title="MR-X VPN Panel" \
+LABEL maintainer="MXUI Team" \
+      org.opencontainers.image.title="MXUI VPN Panel" \
       org.opencontainers.image.description="Professional VPN Management Panel" \
-      org.opencontainers.image.version="1.0.0" \
-      org.opencontainers.image.vendor="MR-X Team" \
+      org.opencontainers.image.version="2.0.0" \
+      org.opencontainers.image.vendor="MXUI Team" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.source="https://github.com/MR-X-Panel/MR-X"
+      org.opencontainers.image.source="https://github.com/matin-x/mxui"
 
 # Install runtime dependencies
 RUN apk add --no-cache \
@@ -110,13 +110,13 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user (optional, disabled for VPN functionality)
-# RUN addgroup -S Mxui && adduser -S Mxui -G Mxui
+# RUN addgroup -S mxui && adduser -S mxui -G mxui
 
 # Create directories
 RUN mkdir -p /app/{bin,data,logs,web,certs,backups}
 
 # Copy binary from builder
-COPY --from=builder /build/Mxui /app/bin/Mxui
+COPY --from=builder /build/mxui /app/bin/mxui
 
 # Copy Xray from downloader
 COPY --from=xray-downloader /xray/xray /app/bin/xray
@@ -130,7 +130,7 @@ COPY Web/ /app/web/
 COPY config.yaml /app/config.yaml
 
 # Set permissions
-RUN chmod +x /app/bin/Mxui /app/bin/xray && \
+RUN chmod +x /app/bin/mxui /app/bin/xray && \
     chmod 755 /app && \
     chmod 700 /app/data /app/logs /app/certs /app/backups
 
@@ -138,12 +138,12 @@ RUN chmod +x /app/bin/Mxui /app/bin/xray && \
 WORKDIR /app
 
 # Environment variables
-ENV Mxui_CONFIG=/app/config.yaml \
-    Mxui_DATA_DIR=/app/data \
-    Mxui_LOG_DIR=/app/logs \
-    Mxui_HOST=0.0.0.0 \
-    Mxui_PORT=8443 \
-    Mxui_API_PORT=8080 \
+ENV MXUI_CONFIG=/app/config.yaml \
+    MXUI_DATA_DIR=/app/data \
+    MXUI_LOG_DIR=/app/logs \
+    MXUI_HOST=0.0.0.0 \
+    MXUI_PORT=8443 \
+    MXUI_API_PORT=8080 \
     TZ=UTC \
     GOGC=100
 
@@ -164,10 +164,10 @@ VOLUME ["/app/data", "/app/logs", "/app/certs", "/app/backups"]
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -sf http://localhost:${Mxui_PORT}/health || exit 1
+    CMD curl -sf http://localhost:${MXUI_PORT}/health || exit 1
 
 # Entry point
-ENTRYPOINT ["/app/bin/Mxui"]
+ENTRYPOINT ["/app/bin/mxui"]
 
 # Default command
 CMD ["serve", "--config", "/app/config.yaml"]

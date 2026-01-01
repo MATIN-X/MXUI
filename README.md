@@ -2,24 +2,24 @@
   <img src="./Web/assets/logo.png" alt="MXUI Logo" width="200"/>
 </p>
 
-<h1 align="center">MR-X VPN Panel</h1>
+<h1 align="center">MXUI VPN Panel</h1>
 
 <p align="center">
   <b>Professional Multi-Protocol VPN Management Panel</b>
 </p>
 
 <p align="center">
-  <a href="https://github.com/MR-X-Panel/MR-X/releases/latest">
-    <img src="https://img.shields.io/github/v/release/MR-X-Panel/MR-X?style=flat-square&color=blue" alt="Latest Release"/>
+  <a href="https://github.com/matin-x/mxui/releases/latest">
+    <img src="https://img.shields.io/github/v/release/matin-x/mxui?style=flat-square&color=blue" alt="Latest Release"/>
   </a>
-  <a href="https://github.com/MR-X-Panel/MR-X/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/MR-X-Panel/MR-X?style=flat-square" alt="License"/>
+  <a href="https://github.com/matin-x/mxui/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/matin-x/mxui?style=flat-square" alt="License"/>
   </a>
-  <a href="https://github.com/MR-X-Panel/MR-X/stargazers">
-    <img src="https://img.shields.io/github/stars/MR-X-Panel/MR-X?style=flat-square" alt="Stars"/>
+  <a href="https://github.com/matin-x/mxui/stargazers">
+    <img src="https://img.shields.io/github/stars/matin-x/mxui?style=flat-square" alt="Stars"/>
   </a>
-  <a href="https://github.com/MR-X-Panel/MR-X/issues">
-    <img src="https://img.shields.io/github/issues/MR-X-Panel/MR-X?style=flat-square" alt="Issues"/>
+  <a href="https://github.com/matin-x/mxui/issues">
+    <img src="https://img.shields.io/github/issues/matin-x/mxui?style=flat-square" alt="Issues"/>
   </a>
   <a href="https://t.me/MXUI_Support">
     <img src="https://img.shields.io/badge/Telegram-Support-blue?style=flat-square&logo=telegram" alt="Telegram"/>
@@ -46,9 +46,9 @@
 
 ## 📖 Overview
 
-MR-X is a powerful, feature-rich VPN management panel built with Go and modern web technologies. It provides an intuitive interface for managing multiple VPN protocols, users, nodes, and subscriptions with enterprise-grade features.
+MXUI is a powerful, feature-rich VPN management panel built with Go and modern web technologies. It provides an intuitive interface for managing multiple VPN protocols, users, nodes, and subscriptions with enterprise-grade features.
 
-### Why MR-X?
+### Why MXUI?
 
 - **Multi-Protocol Support**: VMess, VLESS, Trojan, Shadowsocks 2022, Hysteria2, TUIC, WireGuard
 - **Multiple Cores**: Xray-core, Sing-box, Clash Meta
@@ -187,7 +187,7 @@ MXUI_AUTO_TLS=true
 
 ### Configuration File
 
-Edit `/opt/Mxui/config.yaml`:
+Edit `/opt/mxui/config/config.yaml`:
 
 ```yaml
 server:
@@ -196,7 +196,7 @@ server:
 
 database:
   type: "sqlite"
-  path: "/opt/Mxui/data/Mxui.db"
+  path: "/opt/mxui/data/mxui.db"
 
 ssl:
   enabled: true
@@ -223,50 +223,50 @@ Default credentials are shown after installation. **Change them immediately!**
 
 ```bash
 # Service management
-systemctl start Mxui      # Start
-systemctl stop Mxui       # Stop
-systemctl restart Mxui    # Restart
-systemctl status Mxui     # Status
+mxui start      # Start
+mxui stop       # Stop
+mxui restart    # Restart
+mxui status     # Status
 
 # View logs
-journalctl -u Mxui -f
+mxui log
 
 # Update
-bash <(curl -sL https://raw.githubusercontent.com/MR-X-Panel/MR-X/main/update.sh)
+mxui update
 
 # Uninstall
-bash <(curl -sL https://raw.githubusercontent.com/MR-X-Panel/MR-X/main/uninstall.sh)
+mxui uninstall
 ```
 
 ### CLI Commands
 
 ```bash
 # Show version
-Mxui version
+mxui version
 
 # Generate config
-Mxui config generate
+mxui config generate
 
 # Database operations
-Mxui db migrate
-Mxui db backup
-Mxui db restore backup.sql
+mxui db migrate
+mxui db backup
+mxui db restore backup.sql
 
 # User management
-Mxui user list
-Mxui user create --username test --traffic 10GB --days 30
-Mxui user delete --username test
+mxui user list
+mxui user create --username test --traffic 10GB --days 30
+mxui user delete --username test
 
 # Core management
-Mxui core status
-Mxui core restart
+mxui core status
+mxui core restart
 ```
 
 ---
 
 ## 🔌 API
 
-MR-X provides a comprehensive REST API for integration.
+MXUI provides a comprehensive REST API for integration.
 
 ### Authentication
 
@@ -350,20 +350,20 @@ backup:
 
 ```bash
 # Create backup
-Mxui backup create
+mxui backup create
 
 # List backups
-Mxui backup list
+mxui backup list
 
 # Restore backup
-Mxui backup restore backup_20240101.tar.gz
+mxui backup restore backup_20240101.tar.gz
 ```
 
 ---
 
 ## 🌍 Multi-Language
 
-MR-X supports multiple languages:
+MXUI supports multiple languages:
 
 - 🇬🇧 English
 - 🇮🇷 Persian (فارسی)
@@ -386,7 +386,7 @@ panel:
 **Panel not accessible:**
 ```bash
 # Check service status
-systemctl status Mxui
+systemctl status mxui
 
 # Check port
 ss -tlnp | grep 8443
@@ -398,32 +398,32 @@ ufw status
 **Database errors:**
 ```bash
 # Check database
-sqlite3 /opt/Mxui/data/Mxui.db ".tables"
+sqlite3 /opt/mxui/data/mxui.db ".tables"
 
 # Repair database
-Mxui db repair
+mxui db repair
 ```
 
 **Core not starting:**
 ```bash
 # Check Xray logs
-tail -f /opt/Mxui/logs/xray_error.log
+tail -f /opt/mxui/logs/xray_error.log
 
 # Validate config
-/opt/Mxui/bin/xray -test -config /opt/Mxui/data/xray_config.json
+/opt/mxui/bin/xray -test -config /opt/mxui/data/xray_config.json
 ```
 
 ### Logs
 
 ```bash
 # Panel logs
-tail -f /opt/Mxui/logs/Mxui.log
+tail -f /opt/mxui/logs/mxui.log
 
 # Access logs
-tail -f /opt/Mxui/logs/access.log
+tail -f /opt/mxui/logs/access.log
 
 # Xray logs
-tail -f /opt/Mxui/logs/xray_access.log
+tail -f /opt/mxui/logs/xray_access.log
 ```
 
 ---
@@ -436,8 +436,8 @@ We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for gu
 
 ```bash
 # Clone repository
-git clone https://github.com/MR-X-Panel/MR-X.git
-cd MR-X
+git clone https://github.com/matin-x/mxui.git
+cd mxui
 
 # Install dependencies
 make deps
@@ -472,16 +472,16 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 ## 📞 Support
 
-- **GitHub Issues**: [Report bugs](https://github.com/MR-X-Panel/MR-X/issues)
+- **GitHub Issues**: [Report bugs](https://github.com/matin-x/mxui/issues)
 - **Telegram**: [@MXUI_Support](https://t.me/MXUI_Support)
-- **Documentation**: [Wiki](https://github.com/MR-X-Panel/MR-X/wiki)
+- **Documentation**: [Wiki](https://github.com/matin-x/mxui/wiki)
 
 ---
 
 <p align="center">
-  Made with ❤️ by MR-X Team
+  Made with ❤️ by MXUI Team
 </p>
 
 <p align="center">
-  <a href="#mr-x-vpn-panel">⬆️ Back to Top</a>
+  <a href="#mxui-vpn-panel">⬆️ Back to Top</a>
 </p>
