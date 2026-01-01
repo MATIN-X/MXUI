@@ -1,14 +1,14 @@
 // MXUI - Enterprise VPN Management Panel
 // cmd/mxui/main.go - Executable entrypoint
 // Copyright (c) 2024 MATIN-X Team
-// GitHub: https://github.com/MATIN-X/MXUI
+// GitHub: https://github.com/matin-x/mxui
 
 package main
 
 import (
 	"log"
 
-	core "github.com/MATIN-X/MXUI/Core"
+	core "github.com/matin-x/mxui/Core"
 )
 
 func main() {

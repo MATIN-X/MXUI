@@ -82,40 +82,19 @@
       "name": "کاربران",
       "short_name": "کاربران",
       "description": "مدیریت کاربران",
-      "url": "/dashboard.html#/users",
-      "icons": [
-        {
-          "src": "assets/shortcut-users.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "url": "/panel.html#users"
     },
     {
       "name": "افزودن کاربر",
       "short_name": "کاربر جدید",
       "description": "افزودن کاربر جدید",
-      "url": "/dashboard.html#/users/create",
-      "icons": [
-        {
-          "src": "assets/shortcut-add-user.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "url": "/panel.html#users"
     },
     {
-      "name": "پشتیبان‌گیری",
-      "short_name": "بکاپ",
-      "description": "ایجاد پشتیبان",
-      "url": "/dashboard.html#/backup",
-      "icons": [
-        {
-          "src": "assets/shortcut-backup.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "name": "داشبورد",
+      "short_name": "داشبورد",
+      "description": "داشبورد سیستم",
+      "url": "/panel.html#home"
     }
   ],
   "related_applications": [

@@ -553,47 +553,47 @@ func (cm *ConfigManager) ApplyEnvOverrides() {
 	defer cm.mu.Unlock()
 
 	// Server overrides
-	if v := os.Getenv("Mxui_SERVER_HOST"); v != "" {
+	if v := os.Getenv("MXUI_SERVER_HOST"); v != "" {
 		cm.config.Server.Host = v
 	}
-	if v := os.Getenv("Mxui_SERVER_PORT"); v != "" {
+	if v := os.Getenv("MXUI_SERVER_PORT"); v != "" {
 		fmt.Sscanf(v, "%d", &cm.config.Server.Port)
 	}
-	if v := os.Getenv("Mxui_SERVER_DOMAIN"); v != "" {
+	if v := os.Getenv("MXUI_SERVER_DOMAIN"); v != "" {
 		cm.config.Server.Domain = v
 	}
 
 	// Database overrides
-	if v := os.Getenv("Mxui_DB_TYPE"); v != "" {
+	if v := os.Getenv("MXUI_DB_TYPE"); v != "" {
 		cm.config.Database.Type = v
 	}
-	if v := os.Getenv("Mxui_DB_PATH"); v != "" {
+	if v := os.Getenv("MXUI_DB_PATH"); v != "" {
 		cm.config.Database.Path = v
 	}
-	if v := os.Getenv("Mxui_DB_HOST"); v != "" {
+	if v := os.Getenv("MXUI_DB_HOST"); v != "" {
 		cm.config.Database.Host = v
 	}
 
 	// Security overrides
-	if v := os.Getenv("Mxui_JWT_SECRET"); v != "" {
+	if v := os.Getenv("MXUI_JWT_SECRET"); v != "" {
 		cm.config.Security.JWTSecret = v
 	}
 
 	// Admin overrides
-	if v := os.Getenv("Mxui_ADMIN_USER"); v != "" {
+	if v := os.Getenv("MXUI_ADMIN_USER"); v != "" {
 		cm.config.Admin.Username = v
 	}
-	if v := os.Getenv("Mxui_ADMIN_PASS"); v != "" {
+	if v := os.Getenv("MXUI_ADMIN_PASS"); v != "" {
 		cm.config.Admin.Password = v
 	}
 
 	// Panel overrides
-	if v := os.Getenv("Mxui_PANEL_PATH"); v != "" {
+	if v := os.Getenv("MXUI_PANEL_PATH"); v != "" {
 		cm.config.Panel.LoginPath = v
 	}
 
 	// Telegram overrides
-	if v := os.Getenv("Mxui_TG_TOKEN"); v != "" {
+	if v := os.Getenv("MXUI_TG_TOKEN"); v != "" {
 		cm.config.Telegram.BotToken = v
 		cm.config.Telegram.Enabled = true
 	}

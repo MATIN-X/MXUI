@@ -505,3 +505,10 @@ func InitEnhancedSecurity() {
 
 	LogInfo("SECURITY", "Enhanced security initialized (Argon2id, CSRF, Rate Limiting)")
 }
+
+// InitSessionManager initializes the session manager
+func InitSessionManager() {
+	if GlobalSessionManager == nil {
+		GlobalSessionManager = NewEnhancedSessionManager()
+	}
+}

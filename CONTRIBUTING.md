@@ -345,7 +345,7 @@ MR-X/
 
 - **Documentation**: [Wiki](https://github.com/MR-X-Panel/MR-X/wiki)
 - **Discussions**: [GitHub Discussions](https://github.com/MR-X-Panel/MR-X/discussions)
-- **Telegram**: [@Mxui_Support](https://t.me/Mxui_Support)
+- **Telegram**: [@mxui_support](https://t.me/mxui_support)
 
 ## Recognition
 

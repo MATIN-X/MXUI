@@ -367,7 +367,7 @@ func Run() {
 	if err := InitAuthManager(); err != nil {
 		log.Printf("⚠️  Auth manager init warning: %v", err)
 	}
-	InitSessionManager()
+	InitEnhancedSecurity()
 
 	for _, mgr := range managers {
 		if err := mgr.Start(); err != nil {
@@ -521,28 +521,28 @@ func getDefaultConfig() *Config {
 }
 
 func loadEnvOverrides() {
-	if port := os.Getenv("Mxui_PORT"); port != "" {
+	if port := os.Getenv("MXUI_PORT"); port != "" {
 		fmt.Sscanf(port, "%d", &AppConfig.Server.Port)
 	}
-	if host := os.Getenv("Mxui_HOST"); host != "" {
+	if host := os.Getenv("MXUI_HOST"); host != "" {
 		AppConfig.Server.Host = host
 	}
-	if domain := os.Getenv("Mxui_DOMAIN"); domain != "" {
+	if domain := os.Getenv("MXUI_DOMAIN"); domain != "" {
 		AppConfig.Server.Domain = domain
 	}
-	if adminUser := os.Getenv("Mxui_ADMIN_USER"); adminUser != "" {
+	if adminUser := os.Getenv("MXUI_ADMIN_USER"); adminUser != "" {
 		AppConfig.Admin.Username = adminUser
 	}
-	if adminPass := os.Getenv("Mxui_ADMIN_PASS"); adminPass != "" {
+	if adminPass := os.Getenv("MXUI_ADMIN_PASS"); adminPass != "" {
 		AppConfig.Admin.Password = adminPass
 	}
-	if jwtSecret := os.Getenv("Mxui_JWT_SECRET"); jwtSecret != "" {
+	if jwtSecret := os.Getenv("MXUI_JWT_SECRET"); jwtSecret != "" {
 		AppConfig.Security.JWTSecret = jwtSecret
 	}
-	if apiKey := os.Getenv("Mxui_API_KEY"); apiKey != "" {
+	if apiKey := os.Getenv("MXUI_API_KEY"); apiKey != "" {
 		AppConfig.Security.APIKey = apiKey
 	}
-	if botToken := os.Getenv("Mxui_BOT_TOKEN"); botToken != "" {
+	if botToken := os.Getenv("MXUI_BOT_TOKEN"); botToken != "" {
 		AppConfig.Telegram.BotToken = botToken
 		AppConfig.Telegram.Enabled = true
 	}

@@ -71,29 +71,40 @@ func (api *APIServer) RegisterClientRoutes(router *Router) {
 func (api *APIServer) handleGetSubscription(c *Context) {
 	token := c.Params["token"]
 	if token == "" {
-		c.JSON(http.StatusBadRequest, APIResponse{Error: "Token required"})
+		c.JSON(http.StatusBadRequest, Response{Error: "Token required"})
 		return
 	}
 
-	user := api.users.GetUserBySubToken(token)
-	if user == nil {
-		c.JSON(http.StatusNotFound, APIResponse{Error: "Subscription not found"})
+	if Users == nil {
+		c.JSON(http.StatusInternalServerError, Response{Error: "User manager not initialized"})
+		return
+	}
+
+	user, err := Users.GetUserBySubscriptionURL(token)
+	if err != nil || user == nil {
+		c.JSON(http.StatusNotFound, Response{Error: "Subscription not found"})
 		return
 	}
 
 	// Check if user is active
 	if user.Status != UserStatusActive {
-		c.JSON(http.StatusForbidden, APIResponse{Error: "Subscription inactive"})
+		c.JSON(http.StatusForbidden, Response{Error: "Subscription inactive"})
 		return
+	}
+
+	// Calculate expire timestamp
+	var expireTS int64
+	if user.ExpiryTime != nil {
+		expireTS = user.ExpiryTime.Unix()
 	}
 
 	response := map[string]interface{}{
 		"username":     user.Username,
 		"status":       user.Status,
-		"expire":       user.Expire,
+		"expire":       expireTS,
 		"data_limit":   user.DataLimit,
-		"used_traffic": user.UsedTraffic,
-		"created_at":   user.CreatedAt,
+		"used_traffic": user.DataUsed,
+		"created_at":   user.CreatedAt.Unix(),
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -103,13 +114,18 @@ func (api *APIServer) handleGetSubscription(c *Context) {
 func (api *APIServer) handleGetSubscriptionConfigs(c *Context) {
 	token := c.Params["token"]
 	if token == "" {
-		c.JSON(http.StatusBadRequest, APIResponse{Error: "Token required"})
+		c.JSON(http.StatusBadRequest, Response{Error: "Token required"})
 		return
 	}
 
-	user := api.users.GetUserBySubToken(token)
-	if user == nil {
-		c.JSON(http.StatusNotFound, APIResponse{Error: "Subscription not found"})
+	if Users == nil {
+		c.JSON(http.StatusInternalServerError, Response{Error: "User manager not initialized"})
+		return
+	}
+
+	user, err := Users.GetUserBySubscriptionURL(token)
+	if err != nil || user == nil {
+		c.JSON(http.StatusNotFound, Response{Error: "Subscription not found"})
 		return
 	}
 
@@ -131,13 +147,13 @@ func (api *APIServer) handleClientNotifications(c *Context) {
 		}
 	}
 
-	// Get user from context (set by auth middleware)
-	userID := c.Claims.UserID
+	// Get admin from context (set by auth middleware)
+	adminID := c.Claims.AdminID
 
 	// Get notifications from database
-	notifications, err := api.getClientNotifications(userID, sinceID)
+	notifications, err := getClientNotifications(adminID, sinceID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, APIResponse{Error: "Failed to get notifications"})
+		c.JSON(http.StatusInternalServerError, Response{Error: "Failed to get notifications"})
 		return
 	}
 
@@ -150,72 +166,73 @@ func (api *APIServer) handleClientNotifications(c *Context) {
 func (api *APIServer) handleMarkNotificationRead(c *Context) {
 	notificationID, err := strconv.ParseInt(c.Params["id"], 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, APIResponse{Error: "Invalid notification ID"})
+		c.JSON(http.StatusBadRequest, Response{Error: "Invalid notification ID"})
 		return
 	}
 
-	userID := c.Claims.UserID
+	adminID := c.Claims.AdminID
 
-	err = api.markNotificationRead(userID, notificationID)
+	err = markNotificationRead(adminID, notificationID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, APIResponse{Error: "Failed to mark as read"})
+		c.JSON(http.StatusInternalServerError, Response{Error: "Failed to mark as read"})
 		return
 	}
 
-	c.JSON(http.StatusOK, APIResponse{Success: true})
+	c.JSON(http.StatusOK, Response{Success: true})
 }
 
 // handleClientStatus returns current status for the client
 func (api *APIServer) handleClientStatus(c *Context) {
-	userID := c.Claims.UserID
+	adminID := c.Claims.AdminID
 
-	user, err := api.users.GetUserByID(userID)
+	if Users == nil {
+		c.JSON(http.StatusInternalServerError, Response{Error: "User manager not initialized"})
+		return
+	}
+
+	user, err := Users.GetUserByID(adminID)
 	if err != nil || user == nil {
-		c.JSON(http.StatusNotFound, APIResponse{Error: "User not found"})
+		c.JSON(http.StatusNotFound, Response{Error: "User not found"})
 		return
 	}
 
 	// Calculate remaining data and days
 	remainingData := int64(0)
 	if user.DataLimit > 0 {
-		remainingData = user.DataLimit - user.UsedTraffic
+		remainingData = user.DataLimit - user.DataUsed
 		if remainingData < 0 {
 			remainingData = 0
 		}
 	}
 
 	remainingDays := 0
-	if user.Expire > 0 {
-		expireTime := time.Unix(user.Expire, 0)
-		remainingDays = int(time.Until(expireTime).Hours() / 24)
+	if user.ExpiryTime != nil {
+		remainingDays = int(time.Until(*user.ExpiryTime).Hours() / 24)
 		if remainingDays < 0 {
 			remainingDays = 0
 		}
 	}
 
+	var expireTS int64
+	if user.ExpiryTime != nil {
+		expireTS = user.ExpiryTime.Unix()
+	}
+
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"username":       user.Username,
 		"status":         user.Status,
-		"used_traffic":   user.UsedTraffic,
+		"used_traffic":   user.DataUsed,
 		"data_limit":     user.DataLimit,
 		"remaining_data": remainingData,
-		"expire":         user.Expire,
+		"expire":         expireTS,
 		"remaining_days": remainingDays,
-		"online_count":   user.OnlineCount,
+		"active_devices": user.ActiveDevices,
 		"ip_limit":       user.IPLimit,
 	})
 }
 
 // handleClientServers returns available servers for the client
 func (api *APIServer) handleClientServers(c *Context) {
-	userID := c.Claims.UserID
-
-	user, err := api.users.GetUserByID(userID)
-	if err != nil || user == nil {
-		c.JSON(http.StatusNotFound, APIResponse{Error: "User not found"})
-		return
-	}
-
 	servers := make([]map[string]interface{}, 0)
 
 	// Add master node
@@ -229,17 +246,17 @@ func (api *APIServer) handleClientServers(c *Context) {
 	})
 
 	// Get available nodes if nodes manager is initialized
-	if api.nodes != nil {
-		nodes, err := api.nodes.ListNodes(&NodeFilter{Status: "online"})
-		if err == nil {
-			for _, node := range nodes.Nodes {
+	if Nodes != nil {
+		nodeList := Nodes.ListNodes()
+		for _, node := range nodeList {
+			if node.Status == "online" {
 				servers = append(servers, map[string]interface{}{
 					"id":       node.ID,
 					"name":     node.Name,
 					"location": node.Address,
 					"status":   node.Status,
-					"ping":     node.Ping,
-					"load":     node.Load,
+					"ping":     0,
+					"load":     node.CPUUsage,
 				})
 			}
 		}
@@ -252,13 +269,6 @@ func (api *APIServer) handleClientServers(c *Context) {
 
 // handleClientPing handles client ping/heartbeat
 func (api *APIServer) handleClientPing(c *Context) {
-	userID := c.Claims.UserID
-
-	// Update last seen
-	if api.users != nil {
-		_ = api.users.UpdateLastSeen(userID)
-	}
-
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "ok",
 		"time":   time.Now().Unix(),
@@ -273,26 +283,19 @@ func (api *APIServer) handleClientPing(c *Context) {
 func (api *APIServer) generateUserConfigs(user *User) []map[string]interface{} {
 	configs := make([]map[string]interface{}, 0)
 
-	// Get subscription links if users manager is available
-	if api.users != nil {
-		subLinks := api.users.GetUserLinks(user.ID)
-		for i, link := range subLinks {
-			configs = append(configs, map[string]interface{}{
-				"id":       i + 1,
-				"name":     link.Name,
-				"protocol": link.Protocol,
-				"address":  link.Address,
-				"port":     link.Port,
-				"link":     link.Link,
-			})
-		}
-	}
+	// Basic config info from user
+	configs = append(configs, map[string]interface{}{
+		"id":               1,
+		"username":         user.Username,
+		"uuid":             user.UUID,
+		"subscription_url": user.SubscriptionURL,
+	})
 
 	return configs
 }
 
 // getClientNotifications gets notifications for a client user
-func (api *APIServer) getClientNotifications(userID int64, sinceID int64) ([]ClientNotification, error) {
+func getClientNotifications(userID int64, sinceID int64) ([]ClientNotification, error) {
 	notifications := make([]ClientNotification, 0)
 
 	if DB == nil || DB.db == nil {
@@ -335,7 +338,7 @@ func (api *APIServer) getClientNotifications(userID int64, sinceID int64) ([]Cli
 }
 
 // markNotificationRead marks a notification as read for a user
-func (api *APIServer) markNotificationRead(userID int64, notificationID int64) error {
+func markNotificationRead(userID int64, notificationID int64) error {
 	if DB == nil || DB.db == nil {
 		return nil
 	}
@@ -426,12 +429,12 @@ func (api *APIServer) handleSendClientMessage(c *Context) {
 	}
 
 	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
-		c.JSON(http.StatusBadRequest, APIResponse{Error: "Invalid request"})
+		c.JSON(http.StatusBadRequest, Response{Error: "Invalid request"})
 		return
 	}
 
 	if req.Title == "" || req.Message == "" {
-		c.JSON(http.StatusBadRequest, APIResponse{Error: "Title and message required"})
+		c.JSON(http.StatusBadRequest, Response{Error: "Title and message required"})
 		return
 	}
 
@@ -450,7 +453,7 @@ func (api *APIServer) handleSendClientMessage(c *Context) {
 
 	msg, err := CreateClientMessage(req.Title, req.Message, req.Type, req.Recipients, expiresAt)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, APIResponse{Error: "Failed to create message"})
+		c.JSON(http.StatusInternalServerError, Response{Error: "Failed to create message"})
 		return
 	}
 
@@ -469,7 +472,7 @@ func (api *APIServer) handleGetClientMessages(c *Context) {
 
 	messages, err := GetClientMessages(limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, APIResponse{Error: "Failed to get messages"})
+		c.JSON(http.StatusInternalServerError, Response{Error: "Failed to get messages"})
 		return
 	}
 

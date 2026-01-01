@@ -21,7 +21,7 @@
   <a href="https://github.com/MR-X-Panel/MR-X/issues">
     <img src="https://img.shields.io/github/issues/MR-X-Panel/MR-X?style=flat-square" alt="Issues"/>
   </a>
-  <a href="https://t.me/Mxui_Support">
+  <a href="https://t.me/MXUI_Support">
     <img src="https://img.shields.io/badge/Telegram-Support-blue?style=flat-square&logo=telegram" alt="Telegram"/>
   </a>
 </p>
@@ -148,7 +148,7 @@ MR-X is a powerful, feature-rich VPN management panel built with Go and modern w
 Unified installer (select Master/Node, Bash/Docker, Quick/Custom):
 
 ```bash
-bash <(curl -sL https://raw.githubusercontent.com/MATIN-X/MXUI/main/install.sh)
+bash <(curl -sL https://raw.githubusercontent.com/matin-x/mxui/main/install.sh)
 ```
 
 Notes
@@ -168,21 +168,21 @@ Create a `.env` file or set these environment variables:
 
 ```bash
 # Server
-Mxui_PORT=8443
-Mxui_API_PORT=8080
+MXUI_PORT=8443
+MXUI_API_PORT=8080
 
 # Admin
-Mxui_ADMIN_USER=admin
-Mxui_ADMIN_PASS=your_secure_password
+MXUI_ADMIN_USER=admin
+MXUI_ADMIN_PASS=your_secure_password
 
 # Security
-Mxui_JWT_SECRET=your_jwt_secret
-Mxui_API_KEY=your_api_key
+MXUI_JWT_SECRET=your_jwt_secret
+MXUI_API_KEY=your_api_key
 
 # SSL
-Mxui_SSL_ENABLED=true
-Mxui_DOMAIN=panel.example.com
-Mxui_AUTO_TLS=true
+MXUI_SSL_ENABLED=true
+MXUI_DOMAIN=panel.example.com
+MXUI_AUTO_TLS=true
 ```
 
 ### Configuration File
@@ -473,7 +473,7 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 ## 📞 Support
 
 - **GitHub Issues**: [Report bugs](https://github.com/MR-X-Panel/MR-X/issues)
-- **Telegram**: [@Mxui_Support](https://t.me/Mxui_Support)
+- **Telegram**: [@MXUI_Support](https://t.me/MXUI_Support)
 - **Documentation**: [Wiki](https://github.com/MR-X-Panel/MR-X/wiki)
 
 ---

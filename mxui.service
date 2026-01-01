@@ -21,7 +21,7 @@
 
 [Unit]
 Description=MXUI VPN Panel - Professional VPN Management System
-Documentation=https://github.com/MATIN-X/MXUI
+Documentation=https://github.com/matin-x/mxui
 After=network.target network-online.target nss-lookup.target
 Wants=network-online.target
 Requires=network.target
