@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./Web/assets/logo.png" alt="MR-X Logo" width="200"/>
+  <img src="./Web/assets/logo.png" alt="MXUI Logo" width="200"/>
 </p>
 
 <h1 align="center">MR-X VPN Panel</h1>
