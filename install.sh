@@ -134,14 +134,24 @@ install_dependencies() {
     log_info "Installing dependencies..."
 
     if command -v apt-get &> /dev/null; then
-        apt-get update -y
-        apt-get install -y curl wget git unzip tar gcc make sqlite3 jq
+        # Update package lists (ignore errors from broken PPAs)
+        apt-get update -y 2>/dev/null || log_warning "Some repos failed to update, continuing..."
+        apt-get install -y curl wget git unzip tar gcc make sqlite3 jq || {
+            log_error "Failed to install dependencies"
+            exit 1
+        }
     elif command -v yum &> /dev/null; then
-        yum update -y
-        yum install -y curl wget git unzip tar gcc make sqlite jq
+        yum update -y 2>/dev/null || true
+        yum install -y curl wget git unzip tar gcc make sqlite jq || {
+            log_error "Failed to install dependencies"
+            exit 1
+        }
     elif command -v dnf &> /dev/null; then
-        dnf update -y
-        dnf install -y curl wget git unzip tar gcc make sqlite jq
+        dnf update -y 2>/dev/null || true
+        dnf install -y curl wget git unzip tar gcc make sqlite jq || {
+            log_error "Failed to install dependencies"
+            exit 1
+        }
     fi
 
     log_success "Dependencies installed"
