@@ -1735,24 +1735,84 @@ func (dm *DatabaseManager) GetDatabaseSize() (int64, error) {
 }
 
 func (dm *DatabaseManager) EncryptSensitive(data string) string {
-
 	if !dm.isEncrypted || dm.encryptionKey == nil {
 		return data
 	}
-	return data
+	encrypted, err := dm.Encrypt(data)
+	if err != nil {
+		return data
+	}
+	return encrypted
 }
 
 func (dm *DatabaseManager) DecryptSensitive(data string) string {
 	if !dm.isEncrypted || dm.encryptionKey == nil {
 		return data
 	}
-	return data
+	decrypted, err := dm.Decrypt(data)
+	if err != nil {
+		return data
+	}
+	return decrypted
 }
 
 func (dm *DatabaseManager) Backup(path string) error {
+	dm.mu.Lock()
+	defer dm.mu.Unlock()
+
+	if path == "" {
+		path = dm.dbPath + ".backup"
+	}
+
+	// Read source database
+	sourceData, err := os.ReadFile(dm.dbPath)
+	if err != nil {
+		return fmt.Errorf("failed to read database: %w", err)
+	}
+
+	// Write to backup location
+	if err := os.WriteFile(path, sourceData, 0600); err != nil {
+		return fmt.Errorf("failed to write backup: %w", err)
+	}
+
 	return nil
 }
 
 func (dm *DatabaseManager) Restore(path string) error {
+	dm.mu.Lock()
+	defer dm.mu.Unlock()
+
+	if path == "" {
+		return fmt.Errorf("backup path is required")
+	}
+
+	// Verify backup file exists
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return fmt.Errorf("backup file not found: %s", path)
+	}
+
+	// Read backup data
+	backupData, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("failed to read backup: %w", err)
+	}
+
+	// Close current connection
+	if dm.db != nil {
+		dm.db.Close()
+	}
+
+	// Write backup to database path
+	if err := os.WriteFile(dm.dbPath, backupData, 0600); err != nil {
+		return fmt.Errorf("failed to restore database: %w", err)
+	}
+
+	// Reopen database connection
+	db, err := sql.Open("sqlite3", dm.dbPath+"?_journal_mode=WAL&_busy_timeout=5000")
+	if err != nil {
+		return fmt.Errorf("failed to reopen database: %w", err)
+	}
+	dm.db = db
+
 	return nil
 }

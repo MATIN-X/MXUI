@@ -17,6 +17,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -952,35 +953,300 @@ func refreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func usersHandler(w http.ResponseWriter, r *http.Request) {
-	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    []interface{}{},
-		"total":   0,
-	})
+	if Users == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "User manager not initialized",
+		})
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		// Parse query parameters
+		filter := &UserFilter{
+			Limit:  20,
+			Offset: 0,
+		}
+		if limit := r.URL.Query().Get("limit"); limit != "" {
+			if l, err := strconv.Atoi(limit); err == nil {
+				filter.Limit = l
+			}
+		}
+		if offset := r.URL.Query().Get("offset"); offset != "" {
+			if o, err := strconv.Atoi(offset); err == nil {
+				filter.Offset = o
+			}
+		}
+		if search := r.URL.Query().Get("search"); search != "" {
+			filter.Search = search
+		}
+		if status := r.URL.Query().Get("status"); status != "" {
+			filter.Status = status
+		}
+
+		result, err := Users.ListUsers(filter)
+		if err != nil {
+			respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success":     true,
+			"data":        result.Users,
+			"total":       result.Total,
+			"limit":       result.Limit,
+			"offset":      result.Offset,
+			"total_pages": result.TotalPages,
+		})
+
+	case http.MethodPost:
+		var req CreateUserRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"success": false,
+				"message": "Invalid request body",
+			})
+			return
+		}
+
+		user, err := Users.CreateUser(&req)
+		if err != nil {
+			respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		respondJSON(w, http.StatusCreated, map[string]interface{}{
+			"success": true,
+			"data":    user,
+			"message": "User created successfully",
+		})
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
 }
 
 func userHandler(w http.ResponseWriter, r *http.Request) {
-	respondJSON(w, http.StatusOK, map[string]interface{}{"success": true})
+	if Users == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "User manager not initialized",
+		})
+		return
+	}
+
+	// Extract user ID from path
+	path := strings.TrimPrefix(r.URL.Path, "/api/v1/users/")
+	userID, err := strconv.ParseInt(path, 10, 64)
+	if err != nil {
+		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Invalid user ID",
+		})
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		user, err := Users.GetUserByID(userID)
+		if err != nil {
+			respondJSON(w, http.StatusNotFound, map[string]interface{}{
+				"success": false,
+				"message": "User not found",
+			})
+			return
+		}
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"data":    user,
+		})
+
+	case http.MethodPut:
+		var req UpdateUserRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"success": false,
+				"message": "Invalid request body",
+			})
+			return
+		}
+
+		user, err := Users.UpdateUser(userID, &req)
+		if err != nil {
+			respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"data":    user,
+			"message": "User updated successfully",
+		})
+
+	case http.MethodDelete:
+		if err := Users.DeleteUser(userID); err != nil {
+			respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"message": "User deleted successfully",
+		})
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
 }
 
 func adminsHandler(w http.ResponseWriter, r *http.Request) {
-	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    []interface{}{},
-		"total":   0,
-	})
+	if Admins == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Admin manager not initialized",
+		})
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		filter := &AdminFilter{
+			Limit:  20,
+			Offset: 0,
+		}
+
+		result, err := Admins.ListAdmins(filter)
+		if err != nil {
+			respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"data":    result.Admins,
+			"total":   result.Total,
+		})
+
+	case http.MethodPost:
+		var req CreateAdminRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"success": false,
+				"message": "Invalid request body",
+			})
+			return
+		}
+
+		admin, err := Admins.CreateAdmin(&req, 1) // TODO: get current admin ID
+		if err != nil {
+			respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		respondJSON(w, http.StatusCreated, map[string]interface{}{
+			"success": true,
+			"data":    admin,
+			"message": "Admin created successfully",
+		})
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
 }
 
 func adminHandler(w http.ResponseWriter, r *http.Request) {
-	respondJSON(w, http.StatusOK, map[string]interface{}{"success": true})
+	if Admins == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Admin manager not initialized",
+		})
+		return
+	}
+
+	path := strings.TrimPrefix(r.URL.Path, "/api/v1/admins/")
+	adminID, err := strconv.ParseInt(path, 10, 64)
+	if err != nil {
+		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Invalid admin ID",
+		})
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		admin, err := Admins.GetAdminByID(adminID)
+		if err != nil {
+			respondJSON(w, http.StatusNotFound, map[string]interface{}{
+				"success": false,
+				"message": "Admin not found",
+			})
+			return
+		}
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"data":    admin,
+		})
+
+	case http.MethodDelete:
+		if err := Admins.DeleteAdmin(adminID, 1); err != nil {
+			respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"message": "Admin deleted successfully",
+		})
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
 }
 
 func nodesHandler(w http.ResponseWriter, r *http.Request) {
-	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    []interface{}{},
-		"total":   0,
-	})
+	if Nodes == nil {
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"data":    []interface{}{},
+			"total":   0,
+		})
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		nodes := Nodes.ListNodes()
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"data":    nodes,
+			"total":   len(nodes),
+		})
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
 }
 
 func nodeHandler(w http.ResponseWriter, r *http.Request) {
@@ -1019,20 +1285,52 @@ func systemInfoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func statsHandler(w http.ResponseWriter, r *http.Request) {
+	stats := map[string]interface{}{
+		"users":         0,
+		"active_users":  0,
+		"online_users":  0,
+		"admins":        1,
+		"nodes":         0,
+		"online_nodes":  0,
+		"total_traffic": int64(0),
+		"today_traffic": int64(0),
+		"version":       Version,
+		"uptime":        time.Since(startTime).Seconds(),
+	}
+
+	// Get user stats
+	if Users != nil {
+		if userStats, err := Users.GetUserStats(); err == nil && userStats != nil {
+			stats["users"] = userStats.TotalUsers
+			stats["active_users"] = userStats.ActiveUsers
+			stats["online_users"] = userStats.OnlineUsers
+			stats["total_traffic"] = userStats.TotalTraffic
+		}
+	}
+
+	// Get admin stats
+	if Admins != nil {
+		if adminStats, err := Admins.GetAdminStats(); err == nil && adminStats != nil {
+			stats["admins"] = adminStats.TotalAdmins
+		}
+	}
+
+	// Get node stats
+	if Nodes != nil {
+		nodes := Nodes.ListNodes()
+		stats["nodes"] = len(nodes)
+		onlineNodes := 0
+		for _, node := range nodes {
+			if node.IsAvailable {
+				onlineNodes++
+			}
+		}
+		stats["online_nodes"] = onlineNodes
+	}
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data": map[string]interface{}{
-			"users":         0,
-			"active_users":  0,
-			"online_users":  0,
-			"admins":        1,
-			"nodes":         0,
-			"online_nodes":  0,
-			"total_traffic": 0,
-			"today_traffic": 0,
-			"version":       Version,
-			"uptime":        time.Since(startTime).Seconds(),
-		},
+		"data":    stats,
 	})
 }
 
@@ -1071,19 +1369,43 @@ func configHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func coreStatusHandler(w http.ResponseWriter, r *http.Request) {
+	var coreStatus map[string]interface{}
+
+	if Protocols != nil {
+		coreStatus = Protocols.GetCoreStatus()
+	} else {
+		coreStatus = map[string]interface{}{
+			"xray":    map[string]interface{}{"is_running": false},
+			"singbox": map[string]interface{}{"is_running": false},
+		}
+	}
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data": map[string]interface{}{
-			"xray":    map[string]interface{}{"running": false},
-			"singbox": map[string]interface{}{"running": false},
-		},
+		"data":    coreStatus,
 	})
 }
 
 func coreRestartHandler(w http.ResponseWriter, r *http.Request) {
+	if Protocols == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Protocol manager not initialized",
+		})
+		return
+	}
+
+	if err := Protocols.Restart(); err != nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to restart core: " + err.Error(),
+		})
+		return
+	}
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"message": "Core restarted",
+		"message": "Core restarted successfully",
 	})
 }
 
@@ -1095,28 +1417,161 @@ func coreConfigHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func inboundsHandler(w http.ResponseWriter, r *http.Request) {
+	if Protocols == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Protocol manager not initialized",
+		})
+		return
+	}
+
+	// Get node_id from query params, default to 0 (master node)
+	nodeIDStr := r.URL.Query().Get("node_id")
+	var nodeID int64 = 0
+	if nodeIDStr != "" {
+		if id, err := strconv.ParseInt(nodeIDStr, 10, 64); err == nil {
+			nodeID = id
+		}
+	}
+
+	inbounds, err := Protocols.ListInbounds(nodeID)
+	if err != nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to list inbounds: " + err.Error(),
+		})
+		return
+	}
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"data":    []interface{}{},
-		"total":   0,
+		"data":    inbounds,
+		"total":   len(inbounds),
 	})
 }
 
 func inboundHandler(w http.ResponseWriter, r *http.Request) {
-	respondJSON(w, http.StatusOK, map[string]interface{}{"success": true})
+	if Protocols == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Protocol manager not initialized",
+		})
+		return
+	}
+
+	// Extract inbound ID from URL
+	path := r.URL.Path
+	parts := strings.Split(path, "/")
+	if len(parts) < 4 {
+		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Invalid inbound ID",
+		})
+		return
+	}
+
+	idStr := parts[len(parts)-1]
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Invalid inbound ID",
+		})
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		inbound, err := Protocols.GetInbound(id)
+		if err != nil {
+			respondJSON(w, http.StatusNotFound, map[string]interface{}{
+				"success": false,
+				"message": "Inbound not found",
+			})
+			return
+		}
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"data":    inbound,
+		})
+
+	case http.MethodDelete:
+		if err := Protocols.DeleteInbound(id); err != nil {
+			respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+				"success": false,
+				"message": "Failed to delete inbound: " + err.Error(),
+			})
+			return
+		}
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"message": "Inbound deleted",
+		})
+
+	default:
+		respondJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
+			"success": false,
+			"message": "Method not allowed",
+		})
+	}
 }
 
 func backupHandler(w http.ResponseWriter, r *http.Request) {
+	if DB == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Database not initialized",
+		})
+		return
+	}
+
+	backupPath := "./Data/backup_" + time.Now().Format("20060102_150405") + ".db"
+	if err := DB.Backup(backupPath); err != nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to create backup: " + err.Error(),
+		})
+		return
+	}
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"message": "Backup created",
+		"message": "Backup created successfully",
+		"path":    backupPath,
 	})
 }
 
 func restoreHandler(w http.ResponseWriter, r *http.Request) {
+	if DB == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Database not initialized",
+		})
+		return
+	}
+
+	var req struct {
+		Path string `json:"path"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Path == "" {
+		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Backup path is required",
+		})
+		return
+	}
+
+	if err := DB.Restore(req.Path); err != nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to restore backup: " + err.Error(),
+		})
+		return
+	}
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
-		"message": "Restore completed",
+		"message": "Restore completed successfully",
 	})
 }
 
@@ -1284,7 +1739,29 @@ func generateRefreshToken(username string) string {
 }
 
 func validateToken(token string) bool {
-	return len(token) > 4 && token[:4] == "mxui_"
+	if len(token) < 10 || !strings.HasPrefix(token, "mxui_") {
+		return false
+	}
+
+	// Parse token: mxui_username_expiry
+	parts := strings.Split(token, "_")
+	if len(parts) < 3 {
+		return false
+	}
+
+	// Check expiry
+	expiryStr := parts[len(parts)-1]
+	expiry, err := strconv.ParseInt(expiryStr, 10, 64)
+	if err != nil {
+		return false
+	}
+
+	// Token expired?
+	if time.Now().Unix() > expiry {
+		return false
+	}
+
+	return true
 }
 
 func generateRandomString(length int) string {
