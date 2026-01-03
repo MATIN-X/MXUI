@@ -366,7 +366,7 @@
         (function() {
             const token = storage.get('auth_token');
             if (token) {
-                window.location.href = '/dashboard.html';
+                window.location.href = '/panel.html';
             }
         })();
 
@@ -478,7 +478,7 @@
                 storage.set('admin_data', response.admin);
 
                 // Redirect to dashboard
-                window.location.href = '/dashboard.html';
+                window.location.href = '/panel.html';
 
             } catch (error) {
                 errorMessage.textContent = error.message || 'نام کاربری یا رمز عبور اشتباه است';

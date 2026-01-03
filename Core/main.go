@@ -370,6 +370,20 @@ func Run() {
 	}
 	InitEnhancedSecurity()
 
+	// Initialize protocol manager
+	if err := InitProtocolManager(AppConfig); err != nil {
+		log.Printf("⚠️  Protocol manager init warning: %v", err)
+	} else {
+		log.Println("✓ Protocol manager initialized")
+	}
+
+	// Initialize node manager
+	if err := InitNodeManager(AppConfig); err != nil {
+		log.Printf("⚠️  Node manager init warning: %v", err)
+	} else {
+		log.Println("✓ Node manager initialized")
+	}
+
 	for _, mgr := range managers {
 		if err := mgr.Start(); err != nil {
 			log.Printf("⚠️  %s start warning: %v", mgr.Name(), err)
@@ -432,7 +446,36 @@ func loadConfig() error {
 	log.Printf("✓ Config loaded from: %s", configPath)
 	loadEnvOverrides()
 
+	// Validate and fix port numbers
+	validateConfig()
+
 	return nil
+}
+
+func validateConfig() {
+	// Validate server port (must be 1-65535)
+	if AppConfig.Server.Port < 1 || AppConfig.Server.Port > 65535 {
+		log.Printf("⚠️  Invalid server port %d, using default 8443", AppConfig.Server.Port)
+		AppConfig.Server.Port = 8443
+	}
+
+	// Validate TLS port
+	if AppConfig.Server.TLSPort < 1 || AppConfig.Server.TLSPort > 65535 {
+		log.Printf("⚠️  Invalid TLS port %d, using default 443", AppConfig.Server.TLSPort)
+		AppConfig.Server.TLSPort = 443
+	}
+
+	// Validate login path
+	if AppConfig.Panel.LoginPath == "" {
+		AppConfig.Panel.LoginPath = "/dashboard"
+	}
+
+	// Log loaded config for debugging
+	log.Printf("ℹ️  Server: %s:%d, TLS: %d, LoginPath: %s",
+		AppConfig.Server.Host,
+		AppConfig.Server.Port,
+		AppConfig.Server.TLSPort,
+		AppConfig.Panel.LoginPath)
 }
 
 func getDefaultConfig() *Config {
@@ -731,13 +774,23 @@ func setupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc(loginPath, panelHandler)
 	mux.HandleFunc(loginPath+"/", panelHandler)
 
-	// Static files
+	// Static files - check multiple locations
 	staticDir := "/opt/mxui/web"
+	// Check for development paths first
+	devPaths := []string{"./Web", "./web", "../Web", "../web"}
+	for _, path := range devPaths {
+		if _, err := os.Stat(path); err == nil {
+			staticDir = path
+			break
+		}
+	}
+	// Check production path
 	if _, err := os.Stat(staticDir); err == nil {
 		fs := http.FileServer(http.Dir(staticDir))
 		mux.Handle("/static/", http.StripPrefix("/static/", fs))
 		mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 	}
+	log.Printf("📁 Static files serving from: %s", staticDir)
 
 	// Root handler - serves static files and decoy page
 	staticExtensions := []string{".js", ".css", ".json", ".ico", ".png", ".jpg", ".svg", ".woff", ".woff2", ".ttf", ".html"}
@@ -1153,7 +1206,7 @@ func adminsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		admin, err := Admins.CreateAdmin(&req, 1) // TODO: get current admin ID
+		admin, err := Admins.CreateAdmin(&req, getAdminIDFromRequest(r))
 		if err != nil {
 			respondJSON(w, http.StatusBadRequest, map[string]interface{}{
 				"success": false,
@@ -1208,7 +1261,7 @@ func adminHandler(w http.ResponseWriter, r *http.Request) {
 		})
 
 	case http.MethodDelete:
-		if err := Admins.DeleteAdmin(adminID, 1); err != nil {
+		if err := Admins.DeleteAdmin(adminID, getAdminIDFromRequest(r)); err != nil {
 			respondJSON(w, http.StatusBadRequest, map[string]interface{}{
 				"success": false,
 				"message": err.Error(),
@@ -1592,7 +1645,16 @@ func telegramWebhookHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func panelHandler(w http.ResponseWriter, r *http.Request) {
+	// Check multiple locations for web files
 	staticDir := "/opt/mxui/web"
+	devPaths := []string{"./Web", "./web", "../Web", "../web"}
+	for _, path := range devPaths {
+		if _, err := os.Stat(path); err == nil {
+			staticDir = path
+			break
+		}
+	}
+
 	requestedFile := strings.TrimPrefix(r.URL.Path, AppConfig.Panel.LoginPath)
 	if requestedFile == "" || requestedFile == "/" {
 		requestedFile = "/login.html"
@@ -1788,4 +1850,29 @@ func getServerIP() string {
 		}
 	}
 	return "127.0.0.1"
+}
+
+// getAdminIDFromRequest extracts admin ID from JWT token in request
+func getAdminIDFromRequest(r *http.Request) int64 {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 {
+		return 1 // Default to admin ID 1 if no token
+	}
+
+	token := authHeader[7:] // Remove "Bearer "
+	parts := strings.Split(token, "_")
+	if len(parts) < 3 {
+		return 1
+	}
+
+	// Token format: mxui_username_expiry
+	// Look up admin by username if available
+	username := parts[1]
+	if Admins != nil {
+		if admin, err := Admins.GetAdminByUsername(username); err == nil && admin != nil {
+			return admin.ID
+		}
+	}
+
+	return 1
 }

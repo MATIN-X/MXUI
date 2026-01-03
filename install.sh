@@ -1,9 +1,8 @@
 #!/bin/bash
 
 #========================================================
-# MXUI VPN Panel - Installation Script
+# MXUI VPN Panel - Professional Installation Script
 # Version: 2.0.0
-# Author: MXUI Team
 # GitHub: https://github.com/matin-x/mxui
 #========================================================
 
@@ -14,11 +13,13 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+WHITE='\033[1;37m'
+NC='\033[0m'
+BOLD='\033[1m'
 
 # Configuration
+VERSION="2.0.0"
 INSTALL_DIR="/opt/mxui"
 CONFIG_DIR="$INSTALL_DIR/config"
 DATA_DIR="$INSTALL_DIR/data"
@@ -27,306 +28,296 @@ WEB_DIR="$INSTALL_DIR/web"
 BIN_DIR="$INSTALL_DIR/bin"
 XRAY_DIR="$INSTALL_DIR/xray"
 BACKUP_DIR="$INSTALL_DIR/backups"
+TMP_DIR="/tmp/mxui_install"
+REPORT_FILE="/tmp/mxui_report_$(date +%Y%m%d_%H%M%S).log"
 
 GITHUB_REPO="matin-x/mxui"
 SERVICE_NAME="mxui"
-XRAY_SERVICE_NAME="mxui-xray"
+XRAY_SERVICE="mxui-xray"
 
-# Default admin credentials
-DEFAULT_ADMIN_USER="admin"
-DEFAULT_ADMIN_PASS=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 12)
+DEFAULT_ADMIN="admin"
 DEFAULT_PORT=8443
+DEFAULT_SUB_PORT=8080
 
 #========================================================
-# Helper Functions
+# Logging
 #========================================================
 
-print_banner() {
+log() { echo "[$(date '+%H:%M:%S')] $1" >> "$REPORT_FILE"; }
+info() { echo -e "${BLUE}[INFO]${NC} $1"; log "[INFO] $1"; }
+ok() { echo -e "${GREEN}[OK]${NC} $1"; log "[OK] $1"; }
+warn() { echo -e "${YELLOW}[WARN]${NC} $1"; log "[WARN] $1"; }
+error() { echo -e "${RED}[ERROR]${NC} $1"; log "[ERROR] $1"; }
+
+banner() {
+    clear
     echo -e "${CYAN}"
-    echo "╔═══════════════════════════════════════════════════════════════╗"
-    echo "║          ███╗   ███╗██╗  ██╗██╗   ██╗██╗                      ║"
-    echo "║          ████╗ ████║╚██╗██╔╝██║   ██║██║                      ║"
-    echo "║          ██╔████╔██║ ╚███╔╝ ██║   ██║██║                      ║"
-    echo "║          ██║╚██╔╝██║ ██╔██╗ ██║   ██║██║                      ║"
-    echo "║          ██║ ╚═╝ ██║██╔╝ ██╗╚██████╔╝██║                      ║"
-    echo "║          ╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝                      ║"
-    echo "║                                                               ║"
-    echo "║          Professional VPN Management Panel                    ║"
-    echo "║          Version: 2.0.0                                       ║"
-    echo "╚═══════════════════════════════════════════════════════════════╝"
+    cat << 'EOF'
+  ╔═══════════════════════════════════════════════════════════╗
+  ║   ███╗   ███╗██╗  ██╗██╗   ██╗██╗    Professional VPN     ║
+  ║   ████╗ ████║╚██╗██╔╝██║   ██║██║    Management Panel     ║
+  ║   ██╔████╔██║ ╚███╔╝ ██║   ██║██║    v2.0.0               ║
+  ║   ██║╚██╔╝██║ ██╔██╗ ██║   ██║██║                         ║
+  ║   ██║ ╚═╝ ██║██╔╝ ██╗╚██████╔╝██║    github.com/matin-x   ║
+  ║   ╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝                         ║
+  ╚═══════════════════════════════════════════════════════════╝
+EOF
     echo -e "${NC}"
 }
 
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-log_success() {
-    echo -e "${GREEN}[OK]${NC} $1"
-}
-
-log_warning() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
+#========================================================
+# System Checks
+#========================================================
 
 check_root() {
-    if [[ $EUID -ne 0 ]]; then
-        log_error "This script must be run as root"
-        exit 1
-    fi
+    [[ $EUID -ne 0 ]] && { error "Run as root (sudo)"; exit 1; }
+    ok "Root access"
 }
 
 check_os() {
-    if [[ -f /etc/os-release ]]; then
-        . /etc/os-release
-        OS=$ID
-        VERSION=$VERSION_ID
-    else
-        log_error "Cannot detect OS"
-        exit 1
-    fi
+    [[ ! -f /etc/os-release ]] && { error "Unknown OS"; exit 1; }
+    . /etc/os-release
+    OS=$ID; OS_VER=$VERSION_ID
 
     case $OS in
-        ubuntu|debian)
-            log_info "Detected: $OS $VERSION"
-            ;;
-        centos|rhel|fedora|almalinux|rocky)
-            log_info "Detected: $OS $VERSION"
-            ;;
-        *)
-            log_warning "Untested OS: $OS. Proceeding anyway..."
-            ;;
+        ubuntu|debian) PKG="apt-get" ;;
+        centos|rhel|rocky|almalinux|fedora) PKG="dnf" ;;
+        *) error "Unsupported OS: $OS"; exit 1 ;;
     esac
+    ok "OS: $OS $OS_VER"
 }
 
 check_arch() {
     ARCH=$(uname -m)
     case $ARCH in
-        x86_64|amd64)
-            ARCH="64"
-            GO_ARCH="amd64"
-            ;;
-        aarch64|arm64)
-            ARCH="arm64-v8a"
-            GO_ARCH="arm64"
-            ;;
-        armv7l)
-            ARCH="arm32-v7a"
-            GO_ARCH="arm"
-            ;;
-        *)
-            log_error "Unsupported architecture: $ARCH"
-            exit 1
-            ;;
+        x86_64) GO_ARCH="amd64"; XRAY_ARCH="64" ;;
+        aarch64) GO_ARCH="arm64"; XRAY_ARCH="arm64-v8a" ;;
+        *) error "Unsupported arch: $ARCH"; exit 1 ;;
     esac
-    log_info "Architecture: $ARCH"
+    ok "Arch: $ARCH"
+}
+
+check_network() {
+    ping -c1 google.com &>/dev/null || ping -c1 github.com &>/dev/null || { error "No internet"; exit 1; }
+    PUBLIC_IP=$(curl -s --max-time 5 ip.sb 2>/dev/null || curl -s ifconfig.me 2>/dev/null || hostname -I | awk '{print $1}')
+    ok "IP: $PUBLIC_IP"
+}
+
+check_ports() {
+    for p in $DEFAULT_PORT $DEFAULT_SUB_PORT; do
+        if ss -tuln | grep -q ":$p "; then
+            warn "Port $p in use"
+        fi
+    done
+}
+
+run_diagnostics() {
+    banner
+    echo -e "\n${BOLD}System Diagnostics${NC}\n"
+
+    echo -e "${CYAN}System:${NC}"
+    echo "  OS: $OS $OS_VER"
+    echo "  Kernel: $(uname -r)"
+    echo "  Arch: $ARCH"
+    echo "  RAM: $(free -h | awk '/Mem/{print $2}')"
+    echo "  Disk: $(df -h / | awk 'NR==2{print $4}') free"
+    echo "  CPU: $(nproc) cores"
+
+    echo -e "\n${CYAN}Network:${NC}"
+    echo "  Public IP: $PUBLIC_IP"
+    echo "  Local IP: $(hostname -I | awk '{print $1}')"
+
+    echo -e "\n${CYAN}Services:${NC}"
+    systemctl is-active --quiet mxui && echo "  MXUI: ${GREEN}Running${NC}" || echo "  MXUI: ${RED}Stopped${NC}"
+    systemctl is-active --quiet mxui-xray && echo "  Xray: ${GREEN}Running${NC}" || echo "  Xray: ${RED}Stopped${NC}"
+
+    echo -e "\n${CYAN}Ports:${NC}"
+    for p in 80 443 8443 8080; do
+        ss -tuln | grep -q ":$p " && echo "  $p: ${RED}In Use${NC}" || echo "  $p: ${GREEN}Free${NC}"
+    done
+
+    echo -e "\nReport: $REPORT_FILE\n"
 }
 
 #========================================================
-# Installation Functions
+# Installation
 #========================================================
 
-install_dependencies() {
-    log_info "Installing dependencies..."
+install_deps() {
+    info "Installing dependencies..."
 
-    if command -v apt-get &> /dev/null; then
-        # Update package lists (ignore errors from broken PPAs)
-        apt-get update -y 2>/dev/null || log_warning "Some repos failed to update, continuing..."
-        apt-get install -y curl wget git unzip tar gcc make sqlite3 jq || {
-            log_error "Failed to install dependencies"
-            exit 1
-        }
-    elif command -v yum &> /dev/null; then
-        yum update -y 2>/dev/null || true
-        yum install -y curl wget git unzip tar gcc make sqlite jq || {
-            log_error "Failed to install dependencies"
-            exit 1
-        }
-    elif command -v dnf &> /dev/null; then
-        dnf update -y 2>/dev/null || true
-        dnf install -y curl wget git unzip tar gcc make sqlite jq || {
-            log_error "Failed to install dependencies"
-            exit 1
-        }
-    fi
-
-    log_success "Dependencies installed"
+    case $PKG in
+        apt-get)
+            apt-get update -y 2>/dev/null || warn "Some repos failed"
+            DEBIAN_FRONTEND=noninteractive apt-get install -y curl wget git unzip tar gcc make sqlite3 jq ca-certificates cron >/dev/null 2>&1
+            ;;
+        dnf)
+            dnf install -y curl wget git unzip tar gcc make sqlite jq ca-certificates cronie >/dev/null 2>&1
+            ;;
+    esac
+    ok "Dependencies installed"
 }
 
 install_go() {
-    log_info "Checking Go installation..."
+    info "Installing Go..."
 
-    GO_VERSION="1.22.5"
-
-    if command -v go &> /dev/null; then
-        CURRENT_GO=$(go version | grep -oP '\d+\.\d+' | head -1)
-        if [[ $(echo "$CURRENT_GO >= 1.22" | bc -l 2>/dev/null || echo "0") == "1" ]] || [[ "$CURRENT_GO" == "1.22" ]] || [[ "$CURRENT_GO" > "1.22" ]]; then
-            log_success "Go $CURRENT_GO already installed"
+    if command -v go &>/dev/null; then
+        GO_VER=$(go version | grep -oP '\d+\.\d+' | head -1)
+        if [[ $(echo "$GO_VER >= 1.22" | bc -l 2>/dev/null) == 1 ]] 2>/dev/null || [[ "$GO_VER" > "1.21" ]]; then
+            ok "Go $GO_VER exists"
             return
         fi
     fi
 
-    log_info "Installing Go $GO_VERSION..."
-
-    wget -q "https://go.dev/dl/go${GO_VERSION}.linux-${GO_ARCH}.tar.gz" -O /tmp/go.tar.gz
+    wget -q "https://go.dev/dl/go1.22.5.linux-${GO_ARCH}.tar.gz" -O /tmp/go.tar.gz
     rm -rf /usr/local/go
     tar -C /usr/local -xzf /tmp/go.tar.gz
     rm /tmp/go.tar.gz
 
-    # Add Go to PATH
-    if ! grep -q '/usr/local/go/bin' /etc/profile; then
-        echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
-    fi
+    grep -q '/usr/local/go/bin' /etc/profile || echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
     export PATH=$PATH:/usr/local/go/bin
 
-    log_success "Go $GO_VERSION installed"
+    ok "Go installed"
 }
 
-create_directories() {
-    log_info "Creating directories..."
-
-    mkdir -p "$BIN_DIR"
-    mkdir -p "$CONFIG_DIR"
-    mkdir -p "$DATA_DIR"
-    mkdir -p "$LOG_DIR"
-    mkdir -p "$WEB_DIR"
-    mkdir -p "$XRAY_DIR"
-    mkdir -p "$BACKUP_DIR"
-
-    chmod 755 "$INSTALL_DIR"
-    chmod 700 "$DATA_DIR" "$LOG_DIR" "$BACKUP_DIR"
-
-    log_success "Directories created"
+create_dirs() {
+    info "Creating directories..."
+    mkdir -p "$CONFIG_DIR" "$DATA_DIR" "$LOG_DIR" "$WEB_DIR" "$BIN_DIR" "$XRAY_DIR" "$BACKUP_DIR" "$TMP_DIR"
+    chmod 700 "$CONFIG_DIR"
+    ok "Directories created"
 }
 
 download_source() {
-    log_info "Downloading MXUI source..."
-
-    cd /tmp
+    info "Downloading source..."
+    cd "$TMP_DIR"
     rm -rf mxui
 
-    if git clone --depth 1 "https://github.com/${GITHUB_REPO}.git" mxui 2>/dev/null; then
-        log_success "Source downloaded via git"
+    if command -v git &>/dev/null; then
+        git clone --depth 1 "https://github.com/$GITHUB_REPO.git" mxui 2>/dev/null || {
+            wget -q "https://github.com/$GITHUB_REPO/archive/main.zip" -O mxui.zip
+            unzip -q mxui.zip && mv mxui-main mxui && rm mxui.zip
+        }
     else
-        log_info "Git failed, trying wget..."
-        wget -q "https://github.com/${GITHUB_REPO}/archive/refs/heads/main.zip" -O mxui.zip
-        unzip -q mxui.zip
-        mv mxui-main mxui
-        rm mxui.zip
-        log_success "Source downloaded via wget"
+        wget -q "https://github.com/$GITHUB_REPO/archive/main.zip" -O mxui.zip
+        unzip -q mxui.zip && mv mxui-main mxui && rm mxui.zip
     fi
+    ok "Source downloaded"
 }
 
 build_mxui() {
-    log_info "Building MXUI..."
+    info "Building MXUI..."
+    cd "$TMP_DIR/mxui"
 
-    cd /tmp/mxui
     export PATH=$PATH:/usr/local/go/bin
     export CGO_ENABLED=1
 
-    go mod download 2>/dev/null || true
     go mod tidy 2>/dev/null || true
 
-    if go build -ldflags "-s -w" -o mxui ./cmd/mxui; then
-        log_success "Build completed"
+    if go build -ldflags "-s -w" -o mxui ./cmd/mxui 2>&1 | tee -a "$REPORT_FILE"; then
+        ok "Build complete ($(ls -lh mxui | awk '{print $5}'))"
     else
-        log_error "Build failed!"
+        error "Build failed - check $REPORT_FILE"
         exit 1
     fi
 }
 
 install_mxui() {
-    log_info "Installing MXUI..."
-
-    # Copy binary
-    cp /tmp/mxui/mxui "$BIN_DIR/mxui"
+    info "Installing MXUI..."
+    cp "$TMP_DIR/mxui/mxui" "$BIN_DIR/mxui"
     chmod +x "$BIN_DIR/mxui"
 
-    # Copy web files
-    cp -r /tmp/mxui/Web/* "$WEB_DIR/"
-
-    # Create symlink
-    ln -sf "$BIN_DIR/mxui" /usr/local/bin/mxui
-
-    log_success "MXUI installed"
+    [[ -d "$TMP_DIR/mxui/Web" ]] && cp -r "$TMP_DIR/mxui/Web/"* "$WEB_DIR/"
+    ok "MXUI installed"
 }
 
 install_xray() {
-    log_info "Installing Xray core..."
+    info "Installing Xray..."
 
-    XRAY_VERSION=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+    XRAY_VER=$(curl -s "https://api.github.com/repos/XTLS/Xray-core/releases/latest" | grep '"tag_name"' | cut -d'"' -f4)
+    [[ -z "$XRAY_VER" ]] && XRAY_VER="v24.12.31"
 
-    if [[ -z "$XRAY_VERSION" ]]; then
-        XRAY_VERSION="v1.8.24"
-    fi
-
-    log_info "Downloading Xray $XRAY_VERSION..."
-
-    wget -q "https://github.com/XTLS/Xray-core/releases/download/${XRAY_VERSION}/Xray-linux-${ARCH}.zip" -O /tmp/xray.zip
-
+    wget -q "https://github.com/XTLS/Xray-core/releases/download/${XRAY_VER}/Xray-linux-${XRAY_ARCH}.zip" -O /tmp/xray.zip
     unzip -o -q /tmp/xray.zip -d "$XRAY_DIR"
     chmod +x "$XRAY_DIR/xray"
     rm /tmp/xray.zip
 
-    # Download GeoIP files
-    log_info "Downloading GeoIP data..."
-    wget -q "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat" -O "$XRAY_DIR/geoip.dat" || true
-    wget -q "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat" -O "$XRAY_DIR/geosite.dat" || true
+    # GeoIP
+    wget -q "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat" -O "$XRAY_DIR/geoip.dat" 2>/dev/null || true
+    wget -q "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat" -O "$XRAY_DIR/geosite.dat" 2>/dev/null || true
 
-    log_success "Xray installed"
+    ok "Xray $XRAY_VER installed"
 }
 
 create_config() {
-    log_info "Creating configuration..."
+    info "Creating config..."
+
+    ADMIN_PASS=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 12)
+    JWT_SECRET=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)
 
     cat > "$CONFIG_DIR/config.yaml" << EOF
-# MXUI Configuration
-# Generated: $(date)
-
 server:
   host: "0.0.0.0"
   port: $DEFAULT_PORT
+  tls_port: 443
   ssl_enabled: false
+  read_timeout: 30
+  write_timeout: 30
 
 database:
-  type: "sqlite"
+  type: sqlite
   path: "$DATA_DIR/mxui.db"
 
+security:
+  jwt_secret: "$JWT_SECRET"
+  jwt_expiry: 1440
+  rate_limit_enabled: true
+  brute_force_enabled: true
+
 admin:
-  username: "$DEFAULT_ADMIN_USER"
-  password: "$DEFAULT_ADMIN_PASS"
+  username: "$DEFAULT_ADMIN"
+  password: "$ADMIN_PASS"
 
 panel:
   title: "MXUI Panel"
   login_path: "/dashboard"
   language: "fa"
+  theme: "dark"
+  decoy_enabled: true
+  decoy_type: "nginx"
+
+protocols:
+  xray_enabled: true
+  xray_path: "$XRAY_DIR/xray"
+  xray_config_path: "$DATA_DIR/xray_config.json"
+  xray_api_port: 62789
 
 logging:
-  level: "info"
+  level: info
   path: "$LOG_DIR/mxui.log"
-
-xray:
-  path: "$XRAY_DIR/xray"
-  config_path: "$DATA_DIR/xray_config.json"
-  asset_path: "$XRAY_DIR"
 EOF
-
     chmod 600 "$CONFIG_DIR/config.yaml"
-    log_success "Configuration created"
+
+    # Xray config
+    cat > "$DATA_DIR/xray_config.json" << 'EOF'
+{
+  "log": {"loglevel": "warning"},
+  "api": {"tag": "api", "services": ["HandlerService", "LoggerService", "StatsService"]},
+  "inbounds": [{"tag": "api", "listen": "127.0.0.1", "port": 62789, "protocol": "dokodemo-door", "settings": {"address": "127.0.0.1"}}],
+  "outbounds": [{"protocol": "freedom", "tag": "direct"}, {"protocol": "blackhole", "tag": "blocked"}],
+  "policy": {"levels": {"0": {"statsUserUplink": true, "statsUserDownlink": true}}, "system": {"statsInboundUplink": true, "statsInboundDownlink": true}},
+  "routing": {"rules": [{"inboundTag": ["api"], "outboundTag": "api", "type": "field"}]},
+  "stats": {}
+}
+EOF
+    ok "Config created"
 }
 
 create_services() {
-    log_info "Creating systemd services..."
+    info "Creating services..."
 
-    # MXUI service
-    cat > /etc/systemd/system/${SERVICE_NAME}.service << EOF
+    cat > /etc/systemd/system/mxui.service << EOF
 [Unit]
 Description=MXUI VPN Panel
-Documentation=https://github.com/${GITHUB_REPO}
 After=network.target
 
 [Service]
@@ -337,18 +328,16 @@ ExecStart=$BIN_DIR/mxui --config $CONFIG_DIR/config.yaml
 Restart=on-failure
 RestartSec=5
 LimitNOFILE=65535
-
 Environment=MXUI_CONFIG=$CONFIG_DIR/config.yaml
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-    # Xray service
-    cat > /etc/systemd/system/${XRAY_SERVICE_NAME}.service << EOF
+    cat > /etc/systemd/system/mxui-xray.service << EOF
 [Unit]
-Description=MXUI Xray Service
-After=network.target ${SERVICE_NAME}.service
+Description=MXUI Xray
+After=network.target mxui.service
 
 [Service]
 Type=simple
@@ -357,157 +346,135 @@ ExecStart=$XRAY_DIR/xray run -config $DATA_DIR/xray_config.json
 Restart=on-failure
 RestartSec=5
 LimitNOFILE=65535
+Environment=XRAY_LOCATION_ASSET=$XRAY_DIR
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
     systemctl daemon-reload
-    log_success "Services created"
+    ok "Services created"
 }
 
-create_cli_command() {
-    log_info "Creating CLI command..."
+create_cli() {
+    info "Creating CLI..."
 
-    cat > /usr/local/bin/mxui << 'MXUICLI'
+    cat > /usr/local/bin/mxui << 'EOFCLI'
 #!/bin/bash
-
-SERVICE_NAME="mxui"
-XRAY_SERVICE="mxui-xray"
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'; CYAN='\033[0;36m'; NC='\033[0m'
 INSTALL_DIR="/opt/mxui"
-CONFIG_FILE="$INSTALL_DIR/config/config.yaml"
-
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
+CONFIG="$INSTALL_DIR/config/config.yaml"
 
 case "$1" in
     start)
-        systemctl start $SERVICE_NAME
-        systemctl start $XRAY_SERVICE 2>/dev/null || true
-        echo -e "${GREEN}MXUI started${NC}"
+        systemctl start mxui mxui-xray
+        echo -e "${GREEN}Started${NC}"
         ;;
     stop)
-        systemctl stop $SERVICE_NAME
-        systemctl stop $XRAY_SERVICE 2>/dev/null || true
-        echo -e "${YELLOW}MXUI stopped${NC}"
+        systemctl stop mxui mxui-xray
+        echo -e "${YELLOW}Stopped${NC}"
         ;;
     restart)
-        systemctl restart $SERVICE_NAME
-        systemctl restart $XRAY_SERVICE 2>/dev/null || true
-        echo -e "${GREEN}MXUI restarted${NC}"
+        systemctl restart mxui mxui-xray
+        echo -e "${GREEN}Restarted${NC}"
         ;;
     status)
-        systemctl status $SERVICE_NAME --no-pager
+        echo -e "\n${CYAN}MXUI Status${NC}"
+        systemctl is-active --quiet mxui && echo -e "Panel: ${GREEN}Running${NC}" || echo -e "Panel: ${RED}Stopped${NC}"
+        systemctl is-active --quiet mxui-xray && echo -e "Xray:  ${GREEN}Running${NC}" || echo -e "Xray:  ${RED}Stopped${NC}"
+        echo ""
         ;;
-    log)
-        journalctl -u $SERVICE_NAME -f --no-pager
+    log|logs)
+        journalctl -u mxui -u mxui-xray -f -n ${2:-50}
         ;;
     info)
-        echo ""
-        echo "=========================================="
-        echo "           MXUI Panel Info"
-        echo "=========================================="
-        PORT=$(grep -E "^\s*port:" $CONFIG_FILE 2>/dev/null | awk '{print $2}' | head -1)
-        USER=$(grep -E "^\s*username:" $CONFIG_FILE 2>/dev/null | awk '{print $2}' | head -1 | tr -d '"')
-        PASS=$(grep -E "^\s*password:" $CONFIG_FILE 2>/dev/null | awk '{print $2}' | head -1 | tr -d '"')
+        echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        PORT=$(grep -E "^\s*port:" "$CONFIG" | head -1 | awk '{print $2}')
+        USER=$(grep -E "^\s*username:" "$CONFIG" | head -1 | awk '{print $2}' | tr -d '"')
+        PASS=$(grep -E "^\s*password:" "$CONFIG" | head -1 | awk '{print $2}' | tr -d '"')
         IP=$(curl -s ip.sb 2>/dev/null || hostname -I | awk '{print $1}')
-        echo ""
-        echo -e "  Panel URL: ${GREEN}http://${IP}:${PORT:-8443}/dashboard${NC}"
-        echo ""
-        echo -e "  Username:  ${GREEN}${USER:-admin}${NC}"
-        echo -e "  Password:  ${GREEN}${PASS:-admin}${NC}"
-        echo ""
-        echo "=========================================="
-        echo ""
+        echo -e "  Panel:    ${GREEN}http://${IP}:${PORT}/dashboard${NC}"
+        echo -e "  Username: ${GREEN}${USER}${NC}"
+        echo -e "  Password: ${GREEN}${PASS}${NC}"
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
         ;;
     update)
-        echo -e "${YELLOW}Updating MXUI...${NC}"
         bash <(curl -sL https://raw.githubusercontent.com/matin-x/mxui/main/install.sh)
         ;;
     uninstall)
-        echo -e "${RED}Uninstalling MXUI...${NC}"
-        systemctl stop $SERVICE_NAME 2>/dev/null || true
-        systemctl stop $XRAY_SERVICE 2>/dev/null || true
-        systemctl disable $SERVICE_NAME 2>/dev/null || true
-        systemctl disable $XRAY_SERVICE 2>/dev/null || true
-        rm -f /etc/systemd/system/${SERVICE_NAME}.service
-        rm -f /etc/systemd/system/${XRAY_SERVICE}.service
-        systemctl daemon-reload
-        rm -rf $INSTALL_DIR
-        rm -f /usr/local/bin/mxui
-        echo -e "${GREEN}MXUI uninstalled successfully${NC}"
+        read -p "Remove MXUI? (y/N): " c
+        [[ "$c" =~ ^[Yy]$ ]] && {
+            systemctl stop mxui mxui-xray 2>/dev/null
+            systemctl disable mxui mxui-xray 2>/dev/null
+            rm -rf /opt/mxui /etc/systemd/system/mxui*.service /usr/local/bin/mxui
+            systemctl daemon-reload
+            echo -e "${GREEN}Uninstalled${NC}"
+        }
+        ;;
+    backup)
+        F="$INSTALL_DIR/backups/backup_$(date +%Y%m%d_%H%M%S).tar.gz"
+        tar -czf "$F" -C "$INSTALL_DIR" config data 2>/dev/null
+        echo -e "${GREEN}Backup: $F${NC}"
         ;;
     *)
-        echo ""
-        echo "MXUI Panel Management"
-        echo ""
-        echo "Usage: mxui {command}"
+        echo -e "\n${CYAN}MXUI Panel v2.0${NC}\n"
+        echo "Usage: mxui <command>"
         echo ""
         echo "Commands:"
-        echo "  start      Start MXUI"
-        echo "  stop       Stop MXUI"
-        echo "  restart    Restart MXUI"
+        echo "  start      Start services"
+        echo "  stop       Stop services"
+        echo "  restart    Restart services"
         echo "  status     Show status"
-        echo "  log        View logs"
         echo "  info       Show panel info"
+        echo "  log [n]    View logs"
+        echo "  backup     Create backup"
         echo "  update     Update MXUI"
-        echo "  uninstall  Uninstall MXUI"
+        echo "  uninstall  Remove MXUI"
         echo ""
         ;;
 esac
-MXUICLI
-
+EOFCLI
     chmod +x /usr/local/bin/mxui
-    log_success "CLI command created"
+    ok "CLI created"
 }
 
 start_services() {
-    log_info "Starting services..."
+    info "Starting services..."
 
-    systemctl enable $SERVICE_NAME
-    systemctl start $SERVICE_NAME
-
+    systemctl enable mxui mxui-xray 2>/dev/null
+    systemctl start mxui-xray 2>/dev/null || true
+    sleep 1
+    systemctl start mxui
     sleep 2
 
-    if systemctl is-active --quiet $SERVICE_NAME; then
-        log_success "MXUI started successfully"
+    if systemctl is-active --quiet mxui; then
+        ok "MXUI started"
     else
-        log_error "Failed to start MXUI"
-        journalctl -u $SERVICE_NAME -n 20 --no-pager
+        error "Failed to start MXUI"
+        journalctl -u mxui -n 20 --no-pager
         exit 1
     fi
 }
 
 cleanup() {
-    log_info "Cleaning up..."
-    rm -rf /tmp/mxui
-    log_success "Cleanup completed"
+    rm -rf "$TMP_DIR"
 }
 
 show_result() {
-    IP=$(curl -s ip.sb 2>/dev/null || hostname -I | awk '{print $1}')
+    ADMIN_PASS=$(grep -E "^\s*password:" "$CONFIG_DIR/config.yaml" | head -1 | awk '{print $2}' | tr -d '"')
 
+    echo -e "\n${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}       MXUI Installation Complete!${NC}"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║            MXUI Installation Completed!                       ║${NC}"
-    echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "  ${BOLD}Panel URL:${NC}  ${CYAN}http://${PUBLIC_IP}:${DEFAULT_PORT}/dashboard${NC}"
+    echo -e "  ${BOLD}Username:${NC}   ${GREEN}${DEFAULT_ADMIN}${NC}"
+    echo -e "  ${BOLD}Password:${NC}   ${GREEN}${ADMIN_PASS}${NC}"
     echo ""
-    echo -e "  Panel URL:  ${CYAN}http://${IP}:${DEFAULT_PORT}/dashboard${NC}"
-    echo ""
-    echo -e "  Username:   ${YELLOW}${DEFAULT_ADMIN_USER}${NC}"
-    echo -e "  Password:   ${YELLOW}${DEFAULT_ADMIN_PASS}${NC}"
-    echo ""
-    echo -e "  ${RED}Please change password after first login!${NC}"
-    echo ""
-    echo "  Commands:"
-    echo "    mxui start      - Start panel"
-    echo "    mxui stop       - Stop panel"
-    echo "    mxui restart    - Restart panel"
-    echo "    mxui status     - Show status"
-    echo "    mxui log        - View logs"
-    echo "    mxui info       - Show panel info"
+    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "  Commands: ${CYAN}mxui status${NC} | ${CYAN}mxui info${NC} | ${CYAN}mxui log${NC}"
+    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "  Report: ${CYAN}$REPORT_FILE${NC}"
     echo ""
 }
 
@@ -515,52 +482,122 @@ show_result() {
 # Main Installation
 #========================================================
 
-install() {
-    print_banner
+install_master() {
+    banner
+    echo "[$(date)]" > "$REPORT_FILE"
 
     check_root
     check_os
     check_arch
+    check_network
+    check_ports
 
-    install_dependencies
+    # Check existing
+    if [[ -d "$INSTALL_DIR" ]]; then
+        warn "Existing installation found"
+        read -p "Reinstall? (y/N): " c
+        [[ ! "$c" =~ ^[Yy]$ ]] && exit 0
+        systemctl stop mxui mxui-xray 2>/dev/null || true
+    fi
+
+    install_deps
     install_go
-    create_directories
+    create_dirs
     download_source
     build_mxui
     install_mxui
     install_xray
     create_config
     create_services
-    create_cli_command
+    create_cli
     start_services
     cleanup
-
     show_result
 }
 
-#========================================================
-# Entry Point
-#========================================================
+install_node() {
+    banner
+    echo -e "${YELLOW}Node Installation${NC}\n"
 
-case "${1:-install}" in
-    install|update)
-        install
+    read -p "Master Address (http://ip:port): " MASTER_ADDR
+    read -p "Master Token: " MASTER_TOKEN
+
+    [[ -z "$MASTER_ADDR" || -z "$MASTER_TOKEN" ]] && { error "Required"; exit 1; }
+
+    check_root
+    check_os
+    check_arch
+    check_network
+
+    install_deps
+    create_dirs
+    install_xray
+
+    cat > "$CONFIG_DIR/node.yaml" << EOF
+mode: node
+master_address: "$MASTER_ADDR"
+master_token: "$MASTER_TOKEN"
+EOF
+
+    cat > /etc/systemd/system/mxui-node.service << EOF
+[Unit]
+Description=MXUI Node
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=$XRAY_DIR/xray run -config $DATA_DIR/xray_config.json
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable mxui-node
+
+    echo -e "\n${GREEN}Node installed. Will sync from master.${NC}\n"
+}
+
+show_menu() {
+    banner
+    echo -e "${BOLD}Installation Options:${NC}\n"
+    echo -e "  ${GREEN}1)${NC} Install Master Panel"
+    echo -e "  ${GREEN}2)${NC} Install Node Only"
+    echo -e "  ${GREEN}3)${NC} Run Diagnostics"
+    echo -e "  ${GREEN}4)${NC} Update"
+    echo -e "  ${GREEN}5)${NC} Uninstall"
+    echo -e "  ${GREEN}0)${NC} Exit"
+    echo ""
+    read -p "Choice [1]: " choice
+
+    case ${choice:-1} in
+        1) install_master ;;
+        2) install_node ;;
+        3) check_os; check_arch; check_network; run_diagnostics ;;
+        4) install_master ;;
+        5) mxui uninstall 2>/dev/null || { systemctl stop mxui mxui-xray 2>/dev/null; rm -rf /opt/mxui /usr/local/bin/mxui /etc/systemd/system/mxui*.service; systemctl daemon-reload; echo "Removed"; } ;;
+        0) exit 0 ;;
+        *) error "Invalid"; exit 1 ;;
+    esac
+}
+
+# Main
+case "${1:-}" in
+    --master|-m) install_master ;;
+    --node|-n) install_node ;;
+    --diag|-d) check_os; check_arch; check_network; run_diagnostics ;;
+    --update|-u) install_master ;;
+    --help|-h)
+        echo "MXUI Installer"
+        echo ""
+        echo "Options:"
+        echo "  --master, -m   Install master"
+        echo "  --node, -n     Install node"
+        echo "  --diag, -d     Diagnostics"
+        echo "  --update, -u   Update"
+        echo ""
         ;;
-    uninstall)
-        check_root
-        systemctl stop $SERVICE_NAME 2>/dev/null || true
-        systemctl stop $XRAY_SERVICE_NAME 2>/dev/null || true
-        systemctl disable $SERVICE_NAME 2>/dev/null || true
-        systemctl disable $XRAY_SERVICE_NAME 2>/dev/null || true
-        rm -f /etc/systemd/system/${SERVICE_NAME}.service
-        rm -f /etc/systemd/system/${XRAY_SERVICE_NAME}.service
-        systemctl daemon-reload
-        rm -rf $INSTALL_DIR
-        rm -f /usr/local/bin/mxui
-        echo -e "${GREEN}MXUI uninstalled successfully${NC}"
-        ;;
-    *)
-        echo "Usage: $0 {install|update|uninstall}"
-        exit 1
-        ;;
+    "") show_menu ;;
+    *) error "Unknown: $1"; exit 1 ;;
 esac
