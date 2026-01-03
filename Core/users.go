@@ -6,6 +6,7 @@ package core
 
 import (
 	"crypto/rand"
+	"database/sql"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -262,6 +263,7 @@ func (um *UserManager) CreateUser(req *CreateUserRequest) (*User, error) {
 func (um *UserManager) GetUserByID(id int64) (*User, error) {
 	user := &User{}
 	var tags, protocols, inbounds string
+	var lastIP sql.NullString
 
 	err := DB.db.QueryRow(`
 		SELECT id, uuid, username, email, note, tags, status, is_active,
@@ -278,12 +280,15 @@ func (um *UserManager) GetUserByID(id int64) (*User, error) {
 		&user.UploadUsed, &user.DownloadUsed, &user.TrafficResetPeriod,
 		&user.LastTrafficReset, &user.DeviceLimit, &user.IPLimit,
 		&protocols, &inbounds, &user.CreatedByAdminID,
-		&user.LastOnline, &user.LastIP, &user.CreatedAt, &user.UpdatedAt,
+		&user.LastOnline, &lastIP, &user.CreatedAt, &user.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
 
+	if lastIP.Valid {
+		user.LastIP = lastIP.String
+	}
 	user.Tags = JSONToStringSlice(tags)
 	user.EnabledProtocols = JSONToStringSlice(protocols)
 	user.EnabledInbounds = JSONToStringSlice(inbounds)
@@ -612,6 +617,7 @@ func (um *UserManager) ListUsers(filter *UserFilter) (*UserListResult, error) {
 	for rows.Next() {
 		user := &User{}
 		var tags, protocols, inbounds string
+		var lastIP sql.NullString
 
 		err := rows.Scan(
 			&user.ID, &user.UUID, &user.Username, &user.Email, &user.Note, &tags,
@@ -620,12 +626,15 @@ func (um *UserManager) ListUsers(filter *UserFilter) (*UserListResult, error) {
 			&user.UploadUsed, &user.DownloadUsed, &user.TrafficResetPeriod,
 			&user.LastTrafficReset, &user.DeviceLimit, &user.IPLimit,
 			&protocols, &inbounds, &user.CreatedByAdminID,
-			&user.LastOnline, &user.LastIP, &user.CreatedAt, &user.UpdatedAt,
+			&user.LastOnline, &lastIP, &user.CreatedAt, &user.UpdatedAt,
 		)
 		if err != nil {
 			continue
 		}
 
+		if lastIP.Valid {
+			user.LastIP = lastIP.String
+		}
 		user.Tags = JSONToStringSlice(tags)
 		user.EnabledProtocols = JSONToStringSlice(protocols)
 		user.EnabledInbounds = JSONToStringSlice(inbounds)

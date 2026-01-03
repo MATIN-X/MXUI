@@ -384,6 +384,21 @@ func Run() {
 		log.Println("✓ Node manager initialized")
 	}
 
+	// Initialize Telegram bot if enabled
+	if AppConfig.Telegram.Enabled && AppConfig.Telegram.BotToken != "" {
+		if err := InitTelegramBot(AppConfig.Telegram); err != nil {
+			log.Printf("⚠️  Telegram bot init warning: %v", err)
+		} else {
+			log.Println("✓ Telegram bot initialized")
+			// Start bot in background
+			go func() {
+				if err := Bot.Start(); err != nil {
+					log.Printf("⚠️  Telegram bot error: %v", err)
+				}
+			}()
+		}
+	}
+
 	for _, mgr := range managers {
 		if err := mgr.Start(); err != nil {
 			log.Printf("⚠️  %s start warning: %v", mgr.Name(), err)
@@ -758,6 +773,13 @@ func setupRoutes(mux *http.ServeMux) {
 
 	// Subscription
 	mux.HandleFunc("/api/v1/sub/", subscriptionHandler)
+
+	// Client API - for mobile apps
+	mux.HandleFunc("/api/v1/client/status", clientStatusHandler)
+	mux.HandleFunc("/api/v1/client/servers", clientServersHandler)
+	mux.HandleFunc("/api/v1/client/ping", clientPingHandler)
+	mux.HandleFunc("/api/v1/client/notifications", clientNotificationsHandler)
+	mux.HandleFunc("/api/v1/client/notifications/", clientNotificationHandler)
 
 	// WebSocket
 	mux.HandleFunc("/ws", wsHandler)
@@ -1636,8 +1658,214 @@ func subscriptionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte("# Subscription content"))
+	token := parts[3]
+	if Users == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   "User manager not initialized",
+		})
+		return
+	}
+
+	user, err := Users.GetUserBySubscriptionURL(token)
+	if err != nil || user == nil {
+		respondJSON(w, http.StatusNotFound, map[string]interface{}{
+			"success": false,
+			"error":   "Subscription not found",
+		})
+		return
+	}
+
+	// Check for configs request
+	if len(parts) > 4 && parts[4] == "configs" {
+		configs := []map[string]interface{}{
+			{
+				"id":               1,
+				"username":         user.Username,
+				"uuid":             user.UUID,
+				"subscription_url": user.SubscriptionURL,
+			},
+		}
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"configs": configs,
+		})
+		return
+	}
+
+	// Return subscription info
+	var expireTS int64
+	if user.ExpiryTime != nil {
+		expireTS = user.ExpiryTime.Unix()
+	}
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success":      true,
+		"username":     user.Username,
+		"status":       user.Status,
+		"expire":       expireTS,
+		"data_limit":   user.DataLimit,
+		"used_traffic": user.DataUsed,
+		"created_at":   user.CreatedAt.Unix(),
+	})
+}
+
+// ============================================================================
+// CLIENT API HANDLERS - For Mobile Apps
+// ============================================================================
+
+func clientStatusHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	adminID := getAdminIDFromRequest(r)
+	if adminID == 0 {
+		respondJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"success": false,
+			"error":   "Unauthorized",
+		})
+		return
+	}
+
+	if Users == nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   "User manager not initialized",
+		})
+		return
+	}
+
+	user, err := Users.GetUserByID(adminID)
+	if err != nil || user == nil {
+		respondJSON(w, http.StatusNotFound, map[string]interface{}{
+			"success": false,
+			"error":   "User not found",
+		})
+		return
+	}
+
+	remainingData := int64(0)
+	if user.DataLimit > 0 {
+		remainingData = user.DataLimit - user.DataUsed
+		if remainingData < 0 {
+			remainingData = 0
+		}
+	}
+
+	remainingDays := 0
+	if user.ExpiryTime != nil {
+		remainingDays = int(time.Until(*user.ExpiryTime).Hours() / 24)
+		if remainingDays < 0 {
+			remainingDays = 0
+		}
+	}
+
+	var expireTS int64
+	if user.ExpiryTime != nil {
+		expireTS = user.ExpiryTime.Unix()
+	}
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success":        true,
+		"username":       user.Username,
+		"status":         user.Status,
+		"used_traffic":   user.DataUsed,
+		"data_limit":     user.DataLimit,
+		"remaining_data": remainingData,
+		"expire":         expireTS,
+		"remaining_days": remainingDays,
+		"active_devices": user.ActiveDevices,
+		"ip_limit":       user.IPLimit,
+	})
+}
+
+func clientServersHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	servers := []map[string]interface{}{
+		{
+			"id":       "master",
+			"name":     "Master Node",
+			"location": "Auto",
+			"status":   "online",
+			"ping":     0,
+			"load":     0,
+		},
+	}
+
+	if Nodes != nil {
+		nodeList := Nodes.ListNodes()
+		for _, node := range nodeList {
+			if node.Status == "online" {
+				servers = append(servers, map[string]interface{}{
+					"id":       node.ID,
+					"name":     node.Name,
+					"location": node.Address,
+					"status":   node.Status,
+					"ping":     0,
+					"load":     node.CPUUsage,
+				})
+			}
+		}
+	}
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"servers": servers,
+	})
+}
+
+func clientPingHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"status":  "ok",
+		"time":    time.Now().Unix(),
+	})
+}
+
+func clientNotificationsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	notifications := []map[string]interface{}{}
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success":       true,
+		"notifications": notifications,
+	})
+}
+
+func clientNotificationHandler(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	parts := strings.Split(path, "/")
+
+	if len(parts) < 5 {
+		http.Error(w, "Invalid notification ID", http.StatusBadRequest)
+		return
+	}
+
+	// Handle mark as read: POST /api/v1/client/notifications/:id/read
+	if r.Method == http.MethodPost && len(parts) >= 6 && parts[5] == "read" {
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"message": "Notification marked as read",
+		})
+		return
+	}
+
+	http.Error(w, "Not found", http.StatusNotFound)
 }
 
 func telegramWebhookHandler(w http.ResponseWriter, r *http.Request) {
